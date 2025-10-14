@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import type { Movie, MovieDetails, DownloadLink, Category } from './types';
+import type { Movie, MovieDetails, DownloadLink, Category, Episode } from './types';
 
 const BASE_URL = 'https://hdhub4u.cologne';
 
@@ -70,59 +70,97 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
   const title = $('h1.Title').text().trim();
   const imageUrl = $('div.Image figure img').attr('src') || $('div.post-thumbnail figure img').attr('src') || '';
-  const description = $('div.Description p').first().text().trim();
-
-  const downloadLinks: DownloadLink[] = [];
   
-  // This is a best-effort attempt to find download links.
-  // The actual links are often obfuscated and may require more complex logic.
-  $('div.ind-btn a').each((_, element) => {
-    const url = $(element).attr('href');
-    const quality = $(element).find('span.dli-text').text().trim() || $(element).text().trim();
+  // Extracting from various parts of the page, with fallbacks.
+  const description = $('.kno-rdesc').text().trim() || $('div.Description p').first().text().trim();
 
-    if (url && quality) {
-        // A simple attempt to clean up the quality text
-        const cleanedQuality = quality.replace(/Download Links? ?/i, '').trim();
-        downloadLinks.push({ quality: cleanedQuality, url });
+  // Extracting structured data
+  const movieInfo: Partial<MovieDetails> = {};
+  $('.NFQFxe.Hhmu2e .mod, .NFQFxe.CQKTwc.mod').find('div > div > div').each((i, el) => {
+    const html = $(el).html();
+    if (!html) return;
+    
+    if (html.includes('iMDB Rating:')) {
+        movieInfo.rating = $(el).find('a').text().trim().split('/')[0];
+    } else if (html.includes('Genre:')) {
+        movieInfo.category = $(el).text().replace('Genre:', '').trim();
+    } else if (html.includes('Language:')) {
+        movieInfo.language = $(el).text().replace('Language:', '').trim();
+    } else if (html.includes('Release Date:')) {
+        movieInfo.releaseDate = $(el).text().replace('Release Date:', '').trim();
     }
   });
 
-  if (downloadLinks.length === 0) {
-    // Fallback for episode links
-    $('.page-body h3, .entry-content h3').each((_, element) => {
-        const h3 = $(element);
-        const links = h3.find('a');
-        let downloadUrl: string | undefined;
-        let watchUrl: string | undefined;
-        let episodeText: string = '';
 
-        links.each((_, linkEl) => {
-            const link = $(linkEl);
-            const linkText = link.text().trim().toLowerCase();
-            const href = link.attr('href');
+  const downloadLinks: DownloadLink[] = [];
+  $('div.ind-btn a').each((_, element) => {
+    const url = $(element).attr('href');
+    const qualityText = $(element).find('span.dli-text').text().trim() || $(element).text().trim();
+    
+    if (url && qualityText) {
+        const qualityMatch = qualityText.match(/(\d+p|Watch Online)/i);
+        const quality = qualityMatch ? qualityMatch[0] : qualityText.replace(/Download Links? ?/i, '').trim();
 
-            if (linkText.includes('watch')) {
-                watchUrl = href;
-            } else if (href) {
-                downloadUrl = href;
-                if (!episodeText || !episodeText.toLowerCase().includes('episode')) {
-                  episodeText = link.text().trim();
-                }
-            }
+        downloadLinks.push({ 
+          quality: quality.trim(), 
+          url,
+          title: qualityText
         });
-        
-        if (!episodeText) {
-          episodeText = h3.text().split('|')[0].trim();
-        }
+    }
+  });
 
-        if (downloadUrl) {
-            downloadLinks.push({ quality: episodeText, url: downloadUrl });
-        }
-        if (watchUrl) {
-            downloadLinks.push({ quality: `${episodeText} (Watch)`, url: watchUrl });
-        }
+  const episodeList: Episode[] = [];
+  $('.page-body h3, .entry-content h3').each((i, element) => {
+    const h3 = $(element);
+    const episodeLinks: DownloadLink[] = [];
+    let episodeTitle: string = '';
+
+    h3.find('a').each((_, linkEl) => {
+      const link = $(linkEl);
+      const href = link.attr('href');
+      const linkText = link.text().trim();
+
+      if (href) {
+        episodeLinks.push({
+          title: linkText,
+          url: href,
+          quality: linkText.toLowerCase().includes('watch') ? 'Watch Online' : 'Download',
+        });
+      }
     });
-  }
+
+    if (episodeLinks.length > 0) {
+      // Find the most appropriate title for the episode
+      const episodeTextNode = h3.contents().filter((_, node) => node.type === 'text').text().trim();
+      const episodeTextFromLink = h3.find('a').first().text().trim();
+      episodeTitle = episodeTextNode.split('|')[0].trim() || episodeTextFromLink;
+      
+      // Clean up title
+      episodeTitle = episodeTitle.replace(/:/g, '').trim();
+      if (!episodeTitle.toLowerCase().includes('episode')) {
+        episodeTitle = `Episode ${i + 1}`;
+      }
+      
+      episodeList.push({
+        number: i + 1,
+        title: episodeTitle,
+        downloadLinks: episodeLinks,
+      });
+    }
+  });
+
+  const trailer: MovieDetails['trailer'] = {
+    url: $('iframe[src*="youtube.com/embed"]').attr('src') || '',
+  };
+
+  const screenshots: string[] = [];
+  $('h2:contains("Screen-Shots")').next('h3').find('img').each((_, el) => {
+    const src = $(el).attr('src');
+    if (src) {
+        screenshots.push(src);
+    }
+  });
+
 
   if (!title) return null;
 
@@ -130,8 +168,12 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     title,
     imageUrl,
     path,
-    description,
-    downloadLinks,
+    description: description || 'No description available.',
+    downloadLinks: downloadLinks,
+    episodeList: episodeList,
+    trailer: trailer.url ? trailer : undefined,
+    screenshots: screenshots,
+    ...movieInfo,
   };
 }
 

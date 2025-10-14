@@ -19,7 +19,7 @@ export function DownloadButton({ link }: DownloadButtonProps) {
             <DownloadCloud className="mb-1 h-5 w-5 text-primary" />
         )}
         <span className="text-center text-xs font-semibold leading-tight text-foreground">
-          {link.quality}
+          {link.title}
         </span>
       </Link>
     </Button>

@@ -2,8 +2,16 @@ import { getMovieDetails } from '@/lib/actions';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Clapperboard, Download, Languages, Star, Youtube } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 export const revalidate = 86400; // Revalidate once a day
 
@@ -36,11 +44,13 @@ export default async function MoviePage({ params }: MoviePageProps) {
   if (!details) {
     notFound();
   }
+  
+  const hasEpisodes = details.episodeList && details.episodeList.length > 0;
 
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-8">
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <div className="md:col-span-1">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
+        <div className="md:col-span-4 lg:col-span-3">
           <div className="sticky top-24">
             <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-2xl shadow-primary/10">
               <Image
@@ -53,39 +63,108 @@ export default async function MoviePage({ params }: MoviePageProps) {
             </div>
           </div>
         </div>
-        <div className="md:col-span-2">
+        <div className="md:col-span-8 lg:col-span-9">
           <h1 className="font-headline text-4xl font-bold tracking-tight text-white lg:text-5xl">
             {details.title}
           </h1>
+
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-muted-foreground">
+             {details.rating && (
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-primary" />
+                <span className="font-semibold text-white">{details.rating}</span>
+                <span className="text-sm">/ 10 IMDb</span>
+              </div>
+            )}
+            {details.category && <Badge variant="outline">{details.category.split('|')[0].trim()}</Badge>}
+            {details.language && (
+                <div className="flex items-center gap-2">
+                    <Languages className="h-5 w-5" />
+                    <span>{details.language}</span>
+                </div>
+            )}
+            {details.releaseDate && <Badge variant="secondary">{new Date(details.releaseDate).getFullYear()}</Badge>}
+          </div>
+
           <p className="mt-6 font-body leading-7 text-muted-foreground">
             {details.description}
           </p>
+          
+          {details.trailer?.url && (
+            <a href={details.trailer.url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-red-600/20 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600/40">
+              <Youtube className="h-6 w-6 text-red-500" />
+              Watch Trailer
+            </a>
+          )}
 
-          <div className="mt-8">
-            <h2 className="font-headline text-2xl font-semibold text-white">
-              Download Links
-            </h2>
-            {details.downloadLinks.length > 0 ? (
-                <>
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                    {details.downloadLinks.map((link) => (
-                    <DownloadButton key={link.url} link={link} />
-                    ))}
-                </div>
-                 <Alert variant="default" className="mt-6 bg-muted/50">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Please Note</AlertTitle>
-                    <AlertDescription>
-                        These links may lead to a page with timers or ads. This is part of the source website's system. Click the link and wait for the final download to appear.
-                    </AlertDescription>
-                </Alert>
-                </>
-            ) : (
-                <div className="mt-4 flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted">
-                    <p className="text-muted-foreground">No direct download links found.</p>
-                </div>
-            )}
-          </div>
+          <Separator className="my-8" />
+          
+           {hasEpisodes ? (
+            <div>
+              <h2 className="font-headline text-2xl font-semibold text-white">
+                Episodes
+              </h2>
+              <Accordion type="single" collapsible className="mt-4 w-full">
+                {details.episodeList.map((episode) => (
+                  <AccordionItem value={`episode-${episode.number}`} key={episode.number}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted font-bold text-primary">
+                          {episode.number}
+                        </div>
+                        <span className="text-lg font-semibold">{episode.title}</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-4">
+                        {episode.downloadLinks.map((link, index) => (
+                          <DownloadButton key={index} link={link} />
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+           ) : (
+             <div>
+                <h2 className="font-headline text-2xl font-semibold text-white">
+                  Download Links
+                </h2>
+                {details.downloadLinks.length > 0 ? (
+                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                        {details.downloadLinks.map((link) => (
+                        <DownloadButton key={link.url} link={link} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="mt-4 flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted">
+                        <p className="text-muted-foreground">No direct download links found.</p>
+                    </div>
+                )}
+             </div>
+           )}
+
+          {details.screenshots && details.screenshots.length > 0 && (
+            <div className="mt-12">
+              <h2 className="font-headline text-2xl font-semibold text-white">Screenshots</h2>
+              <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {details.screenshots.map((src, index) => (
+                  <div key={index} className="relative aspect-video overflow-hidden rounded-lg">
+                    <Image src={src} alt={`Screenshot ${index + 1}`} fill className="object-cover transition-transform duration-300 hover:scale-105" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <Alert variant="default" className="mt-8 bg-muted/50">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Please Note</AlertTitle>
+            <AlertDescription>
+                These links may lead to a page with timers or ads. This is part of the source website's system. Click the link and wait for the final download to appear.
+            </AlertDescription>
+          </Alert>
         </div>
       </div>
     </div>
