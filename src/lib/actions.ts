@@ -126,27 +126,21 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   
   const movieInfo: Partial<MovieDetails> = {};
   
-  $('.kp-hc .mod, .tec-info, .page-body > div, .page-body > p').each((_, el) => {
+  $('.kp-hc .mod, .tec-info, .page-body > div, .page-body > p, .page-body span').each((_, el) => {
     const element = $(el);
-    let text = element.text();
-    
-    // Clean up text by removing child element text
-    element.children().each((_, child) => {
-        text = text.replace($(child).text(), '');
-    });
-    text = text.trim();
+    let text = element.clone().children().remove().end().text().trim();
 
     if (text.match(/iMDB Rating:\s*([0-9.]+)/)) {
         movieInfo.rating = text.match(/iMDB Rating:\s*([0-9.]+)/)?.[1];
     }
     if (text.match(/Genre:|Genres:/)) {
-        movieInfo.category = text.replace(/Genre:|Genres:/, '').trim();
+        movieInfo.category = element.find('a').map((_, a) => $(a).text().trim()).get().join(' | ') || text.replace(/Genre:|Genres:/, '').trim();
     }
      if (text.match(/Director:/)) {
-        movieInfo.director = text.replace(/Director:/, '').trim();
+        movieInfo.director = element.find('a').map((_, a) => $(a).text().trim()).get().join(', ') || text.replace(/Director:/, '').trim();
     }
      if (text.match(/Stars:|Creator:/)) {
-        movieInfo.stars = text.replace(/Stars:|Creator:/, '').trim();
+        movieInfo.stars = element.find('a').map((_, a) => $(a).text().trim()).get().join(', ') || text.replace(/Stars:|Creator:/, '').trim();
     }
     if (text.match(/Language:/)) {
         movieInfo.language = text.replace('Language:', '').trim();
@@ -178,14 +172,14 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const allDownloadLinks: DownloadLink[] = [];
   const seenUrls = new Set<string>();
 
-  // Get all external links from the page body
-  $('.page-body a').each((_, element) => {
+  // Get all external links from the page body, including h2, h3, h4
+  $('.page-body a, .page-body h2 a, .page-body h3 a, .page-body h4 a, .page-body h5 a').each((_, element) => {
     const a = $(element);
     const url = a.attr('href');
     const text = a.text().trim();
 
     if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url) && !url.includes('/how-to-download')) {
-      if (text && text.length > 2 && text.toLowerCase() !== 'here') {
+      if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
          allDownloadLinks.push({ 
           quality: text, 
           url,
@@ -213,9 +207,15 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       episodeTitle = `Part ${i + 1}`;
     }
 
-    let container = header.nextUntil('h3, h2, hr');
+    let container: cheerio.Cheerio<cheerio.Element> = header;
+    // Look for links in the header itself, then siblings until the next header
+    if (header.find('a').length === 0) {
+      container = header.nextUntil('h3, h2, hr');
+    }
+
+    // If still no links, try a broader search in all siblings
     if(container.find('a').length === 0) {
-      container = header;
+      container = header.siblings();
     }
 
 
@@ -250,7 +250,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
 
   const screenshots: string[] = [];
-  $('img.alignnone, h2:contains("Screen-Shots") + h3 > a > img, .entry-content img.alignnone, .page-body img.alignnone').each((_, el) => {
+  $('img.alignnone, h2:contains("Screen-Shots") + h3 a img, .entry-content img.alignnone, .page-body img.alignnone').each((_, el) => {
     const src = $(el).attr('src');
     if (src && !screenshots.includes(src)) {
         screenshots.push(src);
