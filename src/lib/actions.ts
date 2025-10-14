@@ -172,8 +172,21 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const allDownloadLinks: DownloadLink[] = [];
   const seenUrls = new Set<string>();
 
-  // Get all external links from the page body, including h2, h3, h4
-  $('.page-body a, .page-body h2 a, .page-body h3 a, .page-body h4 a, .page-body h5 a').each((_, element) => {
+  // Get all external links from the page body, including h2, h3, h4, and h5
+  const linkSelectors = [
+    '.page-body a', 
+    '.entry-content a',
+    '.page-body h2 a', 
+    '.page-body h3 a', 
+    '.page-body h4 a',
+    '.page-body h5 a',
+    '.entry-content h2 a',
+    '.entry-content h3 a',
+    '.entry-content h4 a',
+    '.entry-content h5 a',
+  ];
+
+  $(linkSelectors.join(', ')).each((_, element) => {
     const a = $(element);
     const url = a.attr('href');
     const text = a.text().trim();
@@ -256,7 +269,9 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       '.entry-content img.alignnone', 
       '.page-body img.alignnone',
       '.page-body p img',
-      '.entry-content p img'
+      '.entry-content p img',
+      '.page-body .aligncenter',
+      '.entry-content .aligncenter',
   ];
 
   $(screenshotSelectors.join(', ')).each((_, el) => {
