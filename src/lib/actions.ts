@@ -184,7 +184,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     const url = a.attr('href');
     const text = a.text().trim();
 
-    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url)) {
+    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url) && !url.includes('/how-to-download')) {
       if (text && text.length > 2 && text.toLowerCase() !== 'here') {
          allDownloadLinks.push({ 
           quality: text, 
