@@ -7,9 +7,8 @@ import { ArrowRight } from 'lucide-react';
 export const revalidate = 3600; // Revalidate every hour
 
 async function getHomepageMoviesFromApi(page: number = 1): Promise<Movie[]> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
     try {
-        const res = await fetch(`${baseUrl}/api/scrape?page=${page}`, { 
+        const res = await fetch(`/api/scrape?page=${page}`, { 
             next: { revalidate: 3600 },
             headers: {
                 'Accept': 'application/json',
