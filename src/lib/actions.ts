@@ -175,7 +175,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const allDownloadLinks: DownloadLink[] = [];
   const seenUrls = new Set<string>();
 
-  // Get all external links from the page body, including h2, h3, h4, and h5
+  // Get all external links from the page body, including h2, h3, h4, and h5, and p tags.
   const linkSelectors = [
     '.page-body a', 
     '.entry-content a',

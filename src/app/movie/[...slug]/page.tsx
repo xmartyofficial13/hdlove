@@ -88,6 +88,8 @@ export default async function MoviePage({ params }: MoviePageProps) {
   
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
   const hasDownloads = details.downloadLinks && details.downloadLinks.length > 0;
+  const hubdriveLinks = details.downloadLinks?.filter(link => link.url.includes('hubdrive.space')) || [];
+  const otherDownloadLinks = details.downloadLinks?.filter(link => !link.url.includes('hubdrive.space')) || [];
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -136,50 +138,19 @@ export default async function MoviePage({ params }: MoviePageProps) {
           )}
 
           <Separator className="my-8" />
-          
-           {hasEpisodes ? (
-            <div>
-              <h2 className="font-headline text-2xl font-semibold text-white">
-                Episodes
-              </h2>
-              <Accordion type="single" collapsible className="mt-4 w-full">
-                {details.episodeList.map((episode) => (
-                  <AccordionItem value={`episode-${episode.number}`} key={episode.number}>
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted font-bold text-primary">
-                          {episode.number}
-                        </div>
-                        <span className="text-lg font-semibold">{episode.title}</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-4">
-                        {episode.downloadLinks.map((link, index) => (
-                          <DownloadButton key={index} link={link} />
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-           ) : hasDownloads ? (
-             <div>
+
+          {hubdriveLinks.length > 0 && (
+             <div className="mb-8">
                 <h2 className="font-headline text-2xl font-semibold text-white">
-                  Download Links
+                  HubDrive Download Links
                 </h2>
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                    {details.downloadLinks.map((link) => (
+                    {hubdriveLinks.map((link) => (
                     <DownloadButton key={link.url} link={link} />
                     ))}
                 </div>
              </div>
-           ) : (
-             <div className="mt-4 flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted">
-                 <p className="text-muted-foreground">No download links found.</p>
-             </div>
-           )}
+          )}
 
           {details.screenshots && details.screenshots.length > 0 && (
             <div className="mt-12">
@@ -210,6 +181,52 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 </Carousel>
             </div>
           )}
+          
+           {hasEpisodes ? (
+            <div className="mt-8">
+              <h2 className="font-headline text-2xl font-semibold text-white">
+                Episodes
+              </h2>
+              <Accordion type="single" collapsible className="mt-4 w-full">
+                {details.episodeList.map((episode) => (
+                  <AccordionItem value={`episode-${episode.number}`} key={episode.number}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted font-bold text-primary">
+                          {episode.number}
+                        </div>
+                        <span className="text-lg font-semibold">{episode.title}</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-4">
+                        {episode.downloadLinks.map((link, index) => (
+                          <DownloadButton key={index} link={link} />
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+           ) : otherDownloadLinks.length > 0 ? (
+             <div className="mt-8">
+                <h2 className="font-headline text-2xl font-semibold text-white">
+                  Download Links
+                </h2>
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {otherDownloadLinks.map((link) => (
+                    <DownloadButton key={link.url} link={link} />
+                    ))}
+                </div>
+             </div>
+           ) : (
+            !hasDownloads && (
+             <div className="mt-4 flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted">
+                 <p className="text-muted-foreground">No download links found.</p>
+             </div>
+            )
+           )}
           
           <Alert variant="default" className="mt-8 bg-muted/50">
             <AlertCircle className="h-4 w-4" />
