@@ -67,8 +67,9 @@ function parseMovies(html: string): Movie[] {
   return movies;
 }
 
-export async function getHomepageMovies(): Promise<Movie[]> {
-  const html = await fetchHtml(BASE_URL);
+export async function getHomepageMovies(page: number = 1): Promise<Movie[]> {
+  const url = page > 1 ? `${BASE_URL}/page/${page}` : BASE_URL;
+  const html = await fetchHtml(url);
   if (!html) return [];
   const movies = parseMovies(html);
   return movies.map(movie => ({
