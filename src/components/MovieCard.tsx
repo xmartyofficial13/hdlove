@@ -11,7 +11,7 @@ interface MovieCardProps {
 
 export function MovieCard({ movie, className }: MovieCardProps) {
   return (
-    <Link href={movie.path} className={cn('group block', className)} prefetch={false}>
+    <Link href={`/movie${movie.path.startsWith('/') ? movie.path : `/${movie.path}`}`} className={cn('group block', className)} prefetch={false}>
       <Card className="overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50">
         <CardContent className="p-0">
           <div className="relative aspect-[2/3] w-full">
