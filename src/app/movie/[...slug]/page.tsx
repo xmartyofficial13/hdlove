@@ -163,7 +163,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 <h2 className="font-headline text-2xl font-semibold text-white">
                   Download Links
                 </h2>
-                {details.downloadLinks.length > 0 ? (
+                {details.downloadLinks && details.downloadLinks.length > 0 ? (
                     <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                         {details.downloadLinks.map((link) => (
                         <DownloadButton key={link.url} link={link} />
