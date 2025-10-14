@@ -34,7 +34,7 @@ function parseMovies(html: string): Movie[] {
   const processElement = (_: number, element: cheerio.Element) => {
     const a = $(element).find('a').first();
     let path = a.attr('href')?.replace(BASE_URL, '') || '';
-     if (path.startsWith('https')) {
+     if (path.startsWith('http')) {
         try {
             const url = new URL(path);
             if (url.hostname === new URL(BASE_URL).hostname) {
@@ -113,6 +113,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       'div.page-body > p:first-of-type > span > em',
       'div.page-body > p:contains("DESCRIPTION:") + p',
       'div.kno-rdesc',
+      'div.page-body > p:nth-of-type(1)',
   ];
 
   for (const selector of descriptionSelectors) {
@@ -174,10 +175,10 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       if (categories) movieInfo.category = categories;
   }
 
-  const downloadLinks: DownloadLink[] = [];
+  const allDownloadLinks: DownloadLink[] = [];
   const seenUrls = new Set<string>();
 
-  // Broader selection for all links within the main content area
+  // Get all external links from the page body
   $('.page-body a').each((_, element) => {
     const a = $(element);
     const url = a.attr('href');
@@ -185,7 +186,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
     if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url)) {
       if (text && text.length > 2 && text.toLowerCase() !== 'here') {
-         downloadLinks.push({ 
+         allDownloadLinks.push({ 
           quality: text, 
           url,
           title: text
@@ -196,61 +197,54 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   });
   
   const episodeList: Episode[] = [];
-  // This selector is for episodes (TV series)
+  const episodeLinkUrls = new Set<string>();
+
   $('.entry-content h3, .page-body h3, .entry-content h2, .page-body h2').filter((_, el) => {
       const text = $(el).text().toLowerCase();
-      const hasLinks = $(el).find('a').length > 0 || $(el).nextUntil('h3, h2').find('a').length > 0;
+      const nextElements = $(el).nextUntil('h3, h2');
+      const hasLinks = $(el).find('a').length > 0 || nextElements.find('a').length > 0;
       return (text.includes('episode') || text.includes('season')) && hasLinks && !text.includes('download links');
   }).each((i, element) => {
     const header = $(element);
     const episodeLinks: DownloadLink[] = [];
     
-    // Extract title but remove extra text like "DOWNLOAD LINKS"
-    let episodeTitle = header.text().split(/\||:|\–/)[0].replace(/Download Links/i, '').trim();
+    let episodeTitle = header.clone().children().remove().end().text().split(/\||:|\–/)[0].replace(/Download Links/i, '').trim();
     if (!episodeTitle) {
       episodeTitle = `Part ${i + 1}`;
     }
 
-    let container: cheerio.Cheerio<cheerio.Element> = header;
-    // Find the actual container of links. It might be the header itself, a following <p>, or a sibling `div`.
-    if(header.find('a').length === 0) {
-      container = header.nextUntil('h3, h2, hr');
+    let container = header.nextUntil('h3, h2, hr');
+    if(container.find('a').length === 0) {
+      container = header;
     }
+
 
     container.find('a').each((_, linkEl) => {
       const link = $(linkEl);
       const href = link.attr('href');
       const text = link.text().trim();
       
-      if (href && text && href !== '/' && href.startsWith('http')) {
+      if (href && text && href.startsWith('http') && !episodeLinkUrls.has(href)) {
         episodeLinks.push({
           title: text,
           url: href,
           quality: text,
         });
-        // Remove from main downloadLinks to avoid duplication
-        const indexInAllLinks = downloadLinks.findIndex(l => l.url === href);
-        if (indexInAllLinks > -1) {
-            downloadLinks.splice(indexInAllLinks, 1);
-        }
+        episodeLinkUrls.add(href);
       }
     });
     
     if (episodeLinks.length > 0) {
-      const existingEpisode = episodeList.find(e => e.title.toLowerCase() === episodeTitle.toLowerCase());
-      if (existingEpisode) {
-        existingEpisode.downloadLinks.push(...episodeLinks);
-      } else {
-        episodeList.push({
-            number: i + 1,
-            title: episodeTitle,
-            downloadLinks: episodeLinks,
-        });
-      }
+      episodeList.push({
+          number: i + 1,
+          title: episodeTitle,
+          downloadLinks: episodeLinks,
+      });
     }
   });
 
-  const finalDownloadLinks = episodeList.length > 0 ? downloadLinks : downloadLinks;
+  // Filter out episode links from allDownloadLinks
+  const movieDownloadLinks = allDownloadLinks.filter(link => !episodeLinkUrls.has(link.url));
 
   const trailerUrl = $('iframe[src*="youtube.com/embed"]').attr('src');
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
@@ -270,7 +264,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     imageUrl,
     path,
     description: description,
-    downloadLinks: finalDownloadLinks,
+    downloadLinks: movieDownloadLinks,
     episodeList: episodeList.length > 0 ? episodeList : undefined,
     trailer,
     screenshots,
@@ -325,5 +319,3 @@ export async function getCategories(): Promise<Category[]> {
 
     return categories;
 }
-
-      
