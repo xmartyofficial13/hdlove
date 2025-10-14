@@ -87,6 +87,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
   }
   
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
+  const hasDownloads = details.downloadLinks && details.downloadLinks.length > 0;
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -163,22 +164,20 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 ))}
               </Accordion>
             </div>
-           ) : (
+           ) : hasDownloads ? (
              <div>
                 <h2 className="font-headline text-2xl font-semibold text-white">
                   Download Links
                 </h2>
-                {details.downloadLinks && details.downloadLinks.length > 0 ? (
-                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                        {details.downloadLinks.map((link) => (
-                        <DownloadButton key={link.url} link={link} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="mt-4 flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted">
-                        <p className="text-muted-foreground">No direct download links found.</p>
-                    </div>
-                )}
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {details.downloadLinks.map((link) => (
+                    <DownloadButton key={link.url} link={link} />
+                    ))}
+                </div>
+             </div>
+           ) : (
+             <div className="mt-4 flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted">
+                 <p className="text-muted-foreground">No download links found.</p>
              </div>
            )}
 

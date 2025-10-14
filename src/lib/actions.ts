@@ -34,7 +34,7 @@ function parseMovies(html: string): Movie[] {
   const processElement = (_: number, element: cheerio.Element) => {
     const a = $(element).find('a').first();
     let path = a.attr('href')?.replace(BASE_URL, '') || '';
-     if (path.startsWith('https://')) {
+     if (path.startsWith('https')) {
         try {
             const url = new URL(path);
             if (url.hostname === new URL(BASE_URL).hostname) {
@@ -175,22 +175,26 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   }
 
   const downloadLinks: DownloadLink[] = [];
-  
-  // This selector is for direct movie download links (not episodes)
-  $('.page-body h3 a, .page-body h4 a').each((_, element) => {
-    const url = $(element).attr('href');
-    const qualityText = $(element).text().trim();
-    
-    if (url && qualityText && url.startsWith('http') && !url.includes('how-to-download')) {
-        downloadLinks.push({ 
-          quality: qualityText, 
+  const seenUrls = new Set<string>();
+
+  // Broader selection for all links within the main content area
+  $('.page-body a').each((_, element) => {
+    const a = $(element);
+    const url = a.attr('href');
+    const text = a.text().trim();
+
+    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url)) {
+      if (text && text.length > 2 && text.toLowerCase() !== 'here') {
+         downloadLinks.push({ 
+          quality: text, 
           url,
-          title: qualityText
+          title: text
         });
+        seenUrls.add(url);
+      }
     }
   });
-
-
+  
   const episodeList: Episode[] = [];
   // This selector is for episodes (TV series)
   $('.entry-content h3, .page-body h3, .entry-content h2, .page-body h2').filter((_, el) => {
@@ -224,6 +228,11 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
           url: href,
           quality: text,
         });
+        // Remove from main downloadLinks to avoid duplication
+        const indexInAllLinks = downloadLinks.findIndex(l => l.url === href);
+        if (indexInAllLinks > -1) {
+            downloadLinks.splice(indexInAllLinks, 1);
+        }
       }
     });
     
@@ -241,7 +250,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     }
   });
 
-  const finalDownloadLinks = episodeList.length > 0 ? [] : downloadLinks;
+  const finalDownloadLinks = episodeList.length > 0 ? downloadLinks : downloadLinks;
 
   const trailerUrl = $('iframe[src*="youtube.com/embed"]').attr('src');
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
