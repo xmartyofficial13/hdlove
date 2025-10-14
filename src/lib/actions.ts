@@ -1,3 +1,4 @@
+
 import * as cheerio from 'cheerio';
 import type { Movie, MovieDetails, DownloadLink, Category, Episode } from './types';
 
@@ -165,12 +166,13 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   }
 
   const downloadLinks: DownloadLink[] = [];
+  
   // This selector is for direct movie download links (not episodes)
-  $('p.Dwnl, .dwn-btns p, div.dwn-links .dwn-link').find('a').each((_, element) => {
+  $('p.Dwnl, .dwn-btns p, div.dwn-links .dwn-link, .page-body h3, .page-body h4').find('a').each((_, element) => {
     const url = $(element).attr('href');
     const qualityText = $(element).text().trim();
     
-    if (url && qualityText && url.startsWith('http')) {
+    if (url && qualityText && url.startsWith('http') && !url.includes('how-to-download')) {
         downloadLinks.push({ 
           quality: qualityText, 
           url,
@@ -185,7 +187,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   $('.entry-content h3, .page-body h3, .entry-content h2, .page-body h2').filter((_, el) => {
       const text = $(el).text().toLowerCase();
       const hasLinks = $(el).find('a').length > 0 || $(el).nextUntil('h3, h2').find('a').length > 0;
-      return (text.includes('episode') || text.includes('download')) && hasLinks;
+      return (text.includes('episode') || text.includes('season')) && hasLinks && !text.includes('download links');
   }).each((i, element) => {
     const header = $(element);
     const episodeLinks: DownloadLink[] = [];
@@ -230,14 +232,15 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     }
   });
 
+  const finalDownloadLinks = episodeList.length > 0 ? [] : downloadLinks;
 
   const trailerUrl = $('iframe[src*="youtube.com/embed"]').attr('src');
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
 
   const screenshots: string[] = [];
-  $('img.alignnone, h2:contains("Screen-Shots") + h3 > a > img, .entry-content img').each((_, el) => {
+  $('img.alignnone, h2:contains("Screen-Shots") + h3 > a > img, .entry-content img, .page-body img').each((_, el) => {
     const src = $(el).attr('src');
-    if (src && !screenshots.includes(src) && $(el).hasClass('alignnone')) {
+    if (src && !screenshots.includes(src) && ($(el).hasClass('alignnone') || $(el).attr('decoding') === 'async')) {
         screenshots.push(src);
     }
   });
@@ -249,7 +252,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     imageUrl,
     path,
     description: description,
-    downloadLinks: downloadLinks,
+    downloadLinks: finalDownloadLinks,
     episodeList: episodeList.length > 0 ? episodeList : undefined,
     trailer,
     screenshots,
@@ -304,3 +307,5 @@ export async function getCategories(): Promise<Category[]> {
 
     return categories;
 }
+
+      
