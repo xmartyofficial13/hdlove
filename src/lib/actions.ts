@@ -250,12 +250,23 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
 
   const screenshots: string[] = [];
-  $('img.alignnone, h2:contains("Screen-Shots") + h3 a img, .entry-content img.alignnone, .page-body img.alignnone').each((_, el) => {
+  const screenshotSelectors = [
+      'img.alignnone', 
+      'h2:contains("Screen-Shots") + h3 a img', 
+      '.entry-content img.alignnone', 
+      '.page-body img.alignnone',
+      '.page-body p img',
+      '.entry-content p img'
+  ];
+
+  $(screenshotSelectors.join(', ')).each((_, el) => {
     const src = $(el).attr('src');
-    if (src && !screenshots.includes(src)) {
+    // Ensure we don't add the main poster image to screenshots
+    if (src && !screenshots.includes(src) && src !== imageUrl) {
         screenshots.push(src);
     }
   });
+
 
   if (!title) return null;
 
