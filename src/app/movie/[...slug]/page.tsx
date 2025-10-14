@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
 import { AlertCircle, Calendar, Clapperboard, Download, Languages, Star, Youtube, Film, User, Video } from 'lucide-react';
@@ -95,12 +94,11 @@ export default async function MoviePage({ params }: MoviePageProps) {
         <div className="md:col-span-4 lg:col-span-3">
           <div className="sticky top-24">
             <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-2xl shadow-primary/10">
-              <Image
+              <img
                 src={details.imageUrl}
                 alt={details.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 33vw"
+                className="h-full w-full object-cover"
+                loading="lazy"
               />
             </div>
           </div>
@@ -198,11 +196,11 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     {details.screenshots.map((src, index) => (
                         <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                             <div className="relative aspect-video overflow-hidden rounded-lg">
-                                <Image 
+                                <img 
                                     src={src} 
                                     alt={`Screenshot ${index + 1}`} 
-                                    fill 
-                                    className="object-cover transition-transform duration-300 hover:scale-105" 
+                                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105" 
+                                    loading="lazy"
                                 />
                             </div>
                         </CarouselItem>
