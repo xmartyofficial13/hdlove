@@ -5,8 +5,6 @@ const BASE_URL = 'https://hdhub4u.cologne';
 
 async function fetchHtml(url: string) {
   try {
-    // Use a proxy to avoid CORS issues if running in certain environments.
-    // For local dev, this isn't strictly necessary if fetching server-side.
     const response = await fetch(url, {
       next: { revalidate: 3600 }, // Revalidate every hour
       headers: {
@@ -65,14 +63,20 @@ function parseMovies(html: string): Movie[] {
     $('article.TPost.B').each(processElement);
   }
 
-
   return movies;
 }
 
 export async function getHomepageMovies(): Promise<Movie[]> {
   const html = await fetchHtml(BASE_URL);
   if (!html) return [];
-  return parseMovies(html);
+  const movies = parseMovies(html);
+  // The user's example had a category field, but it's not clear where to get it from on the homepage.
+  // This will be scraped on the detail page instead.
+  return movies.map(movie => ({
+      ...movie,
+      description: movie.title, 
+      category: 'Unknown' 
+  }));
 }
 
 export async function getSearchResults(query: string): Promise<Movie[]> {
@@ -97,40 +101,42 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
   const $ = cheerio.load(html);
 
-  const title = $('h1.Title').text().trim() || $('.kno-ecr-pt').text().trim();
-  const imageUrl = $('div.Image figure img').attr('src') || $('div.post-thumbnail figure img').attr('src') || $('p > img.aligncenter').attr('src') || '';
+  const title = $('h1.Title').text().trim() || $('.kno-ecr-pt').first().text().trim();
+  const imageUrl = $('div.Image figure img').attr('src') || $('div.post-thumbnail figure img').attr('src') || $('p > img.aligncenter').first().attr('src') || '';
   
-  // Extracting description from various possible locations
   let description = "No description available.";
-  if ($('.kno-rdesc > div > div > span').first().text().trim()) {
-      description = $('.kno-rdesc > div > div > span').first().text().trim();
-  } else if ($('div.Description p').first().text().trim()) {
-      description = $('div.Description p').first().text().trim();
-  } else if ($('div.kno-rdesc').text().trim()){
-      description = $('div.kno-rdesc').text().trim().split(/\s{2,}/)[0] || "No description available.";
-  } else if ($('p:contains("DESCRIPTION")').next('p').text().trim()) {
-    description = $('p:contains("DESCRIPTION")').next('p').text().trim();
+  const descriptionSelectors = [
+      'div.kno-rdesc > div > span',
+      'div.Description p',
+      'p:contains("DESCRIPTION") + p',
+      '.PZPZlf.hb8SAc .kno-rdesc',
+  ];
+
+  for (const selector of descriptionSelectors) {
+      const foundDesc = $(selector).first().text().trim();
+      if (foundDesc) {
+          description = foundDesc;
+          break;
+      }
   }
-
-
-  const synopsis = $('.kno-rdesc').text().trim();
 
   const movieInfo: Partial<MovieDetails> = {};
   
-  $('.kp-hc .mod, .tec-info').each((_, el) => {
-    const sectionHtml = $(el).html() || '';
-    const sectionText = $(el).text();
-    if (sectionHtml.includes('iMDB Rating:') || sectionText.includes('iMDB Rating:')) {
-        movieInfo.rating = $(el).find('a').text().split('/')[0].trim() || sectionText.split('iMDB Rating:')[1].trim().split('/')[0];
+  $('.kp-hc .mod, .tec-info, .page-body > div').each((_, el) => {
+    const element = $(el);
+    const text = element.text();
+    
+    if (text.includes('iMDB Rating:')) {
+        movieInfo.rating = text.match(/iMDB Rating:\s*([0-9.]+)/)?.[1];
     }
-    if (sectionHtml.includes('Genre:') || sectionText.includes('Genre:')) {
-        movieInfo.category = $(el).text().replace(/Genre:|Genres:/, '').trim();
+    if (text.includes('Genre:')) {
+        movieInfo.category = text.replace(/Genre:|Genres:/, '').trim();
     }
-     if (sectionHtml.includes('Language:') || sectionText.includes('Language:')) {
-        movieInfo.language = $(el).text().replace('Language:', '').trim();
+    if (text.includes('Language:')) {
+        movieInfo.language = text.replace('Language:', '').trim();
     }
-    if (sectionHtml.includes('Release Date:') || sectionText.includes('Release Date:')) {
-        movieInfo.releaseDate = $(el).text().replace('Release Date:', '').trim();
+    if (text.includes('Release Date:')) {
+        movieInfo.releaseDate = text.replace('Release Date:', '').trim();
     }
   });
 
@@ -142,13 +148,12 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     }
   });
   
-  const categories = $('.page-meta a[data-wpel-link="internal"] .material-text')
-    .map((_, el) => $(el).text().trim())
-    .get()
-    .join(' | ');
-
-  if (!movieInfo.category && categories) {
-    movieInfo.category = categories;
+  if (!movieInfo.category) {
+      const categories = $('.page-meta a[data-wpel-link="internal"] .material-text')
+        .map((_, el) => $(el).text().trim())
+        .get()
+        .join(' | ');
+      if (categories) movieInfo.category = categories;
   }
 
   const downloadLinks: DownloadLink[] = [];
@@ -157,11 +162,8 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     const qualityText = $(element).text().trim();
     
     if (url && qualityText && !qualityText.toLowerCase().includes('watch')) {
-        const qualityMatch = qualityText.match(/(\d+p|Watch Online)/i);
-        const quality = qualityMatch ? qualityMatch[0] : qualityText.replace(/Download Links? ?/i, '').trim();
-
         downloadLinks.push({ 
-          quality: quality.trim(), 
+          quality: qualityText, 
           url,
           title: qualityText
         });
@@ -169,48 +171,56 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   });
 
   const episodeList: Episode[] = [];
-  // Updated selector to be more robust
   $('.entry-content h3, .page-body h3, .entry-content h2, .page-body h2').filter((_, el) => {
       const text = $(el).text().toLowerCase();
-      // Look for "episode" and at least one link
-      return text.includes('episode') && ($(el).find('a').length > 0 || $(el).nextUntil('h3, h2').find('a').length > 0);
+      return (text.includes('episode') || text.includes('episodes')) && ($(el).find('a').length > 0 || $(el).nextUntil('h3, h2').find('a').length > 0);
   }).each((i, element) => {
     const header = $(element);
     const episodeLinks: DownloadLink[] = [];
-    const episodeTitle = header.text().split(/\||:/)[0].trim();
+    
+    // Extract title but remove extra text like "DOWNLOAD LINKS"
+    const episodeTitle = header.text().split(/\||:|\–/)[0].replace(/Download Links/i, '').trim();
 
-    // Check for links directly inside the header
-    header.find('a').each((_, linkEl) => {
+    let current = header;
+    let linkContainer = header.nextUntil('h3, h2, hr');
+
+    // If the header itself has links, use them
+    if (header.find('a').length > 0) {
+        linkContainer = header;
+    } else if (linkContainer.find('a').length === 0) {
+        // If the immediate next elements don't have links, check after a horizontal rule
+        linkContainer = header.nextAll('hr').first().nextUntil('h3, h2, hr');
+    }
+
+    linkContainer.find('a').each((_, linkEl) => {
       const link = $(linkEl);
       const href = link.attr('href');
-      const linkText = link.text().trim();
-      if (href && linkText) {
+      const linkText = link.parent().text().trim() || link.text().trim();
+      const title = link.text().trim();
+      
+      if (href && title) {
         episodeLinks.push({
-          title: linkText,
+          title: title,
           url: href,
-          quality: linkText.toLowerCase().includes('watch') ? 'Watch Online' : 'Download',
+          quality: linkText.toLowerCase().includes('watch') ? 'Watch Online' : title,
         });
       }
     });
-
-    // If no links in header, check subsequent elements until next header
+    
+    // Special handling for the structure where links are inside sibling h3s
     if (episodeLinks.length === 0) {
-        let current = header.next();
-        while (current.length > 0 && !current.is('h3, h2')) {
-            current.find('a').each((_, linkEl) => {
-                 const link = $(linkEl);
-                 const href = link.attr('href');
-                 const linkText = link.text().trim();
-                 if (href && linkText) {
-                     episodeLinks.push({
-                         title: linkText,
-                         url: href,
-                         quality: linkText.toLowerCase().includes('watch') ? 'Watch Online' : 'Download',
-                     });
-                 }
-            });
-            current = current.next();
-        }
+        header.nextUntil('h3, h2, hr').filter('h3').each((_, linkEl) => {
+            const link = $(linkEl).find('a').first();
+            const href = link.attr('href');
+            const title = $(linkEl).text().trim();
+            if(href && title) {
+                 episodeLinks.push({
+                     title: title,
+                     url: href,
+                     quality: title,
+                 });
+            }
+        });
     }
     
     if (episodeLinks.length > 0) {
@@ -227,21 +237,12 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
 
   const screenshots: string[] = [];
-  $('h2:contains("Screen-Shots")').nextUntil('h2, h3').find('img, a > img').each((_, el) => {
+  $('h2:contains("Screen-Shots"), h3:contains("Screen-Shots")').first().nextUntil('h2, h3, hr').find('img, a > img').each((_, el) => {
     const src = $(el).attr('src');
     if (src) {
         screenshots.push(src);
     }
   });
-   if (screenshots.length === 0) {
-      $('h3:contains("Screen-Shots")').find('img, a > img').each((_, el) => {
-          const src = $(el).attr('src');
-          if (src) {
-              screenshots.push(src);
-          }
-      });
-  }
-
 
   if (!title) return null;
 
@@ -250,7 +251,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     imageUrl,
     path,
     description: description,
-    synopsis,
     downloadLinks: downloadLinks,
     episodeList: episodeList.length > 0 ? episodeList : undefined,
     trailer,
