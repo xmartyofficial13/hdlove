@@ -11,7 +11,7 @@ async function getHomepageMoviesFromApi(page: number = 1): Promise<Movie[]> {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
     try {
         const res = await fetch(`${baseUrl}/api/scrape?page=${page}`, { 
-            next: { revalidate: 3600 },
+            cache: 'no-store', // Disable caching for this fetch
             headers: {
                 'Accept': 'application/json',
             }
