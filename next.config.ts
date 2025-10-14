@@ -29,7 +29,8 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https'
+        ,
         hostname: 'i0.wp.com',
         port: '',
         pathname: '/**',
@@ -79,6 +80,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'imagetot.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'myimg.click',
         port: '',
         pathname: '/**',
       }
