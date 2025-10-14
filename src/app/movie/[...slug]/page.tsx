@@ -23,7 +23,7 @@ import type { MovieDetails } from '@/lib/types';
 export const revalidate = 86400; // Revalidate once a day
 
 async function getMovieDetailsFromApi(path: string): Promise<MovieDetails | null> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     try {
         const res = await fetch(`${baseUrl}/api/movie/${path}`, {
             next: { revalidate: 3600 },
