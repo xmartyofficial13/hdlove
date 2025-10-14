@@ -1,4 +1,3 @@
-import { getMovieDetails } from '@/lib/actions';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
@@ -12,8 +11,29 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import type { MovieDetails } from '@/lib/types';
+
 
 export const revalidate = 86400; // Revalidate once a day
+
+async function getMovieDetailsFromApi(path: string): Promise<MovieDetails | null> {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
+    try {
+        const res = await fetch(`${baseUrl}/api/movie/${path}`, {
+            next: { revalidate: 3600 },
+        });
+        if (!res.ok) {
+            console.error("Failed to fetch movie details from API", res.status, res.statusText);
+            return null;
+        }
+        const data = await res.json();
+        return data.movie;
+    } catch(e) {
+        console.error(`Error fetching from /api/movie/${path}:`, e);
+        return null;
+    }
+}
+
 
 interface MoviePageProps {
   params: {
@@ -23,7 +43,7 @@ interface MoviePageProps {
 
 export async function generateMetadata({ params }: MoviePageProps) {
     const path = params.slug.join('/');
-    const details = await getMovieDetails(path);
+    const details = await getMovieDetailsFromApi(path);
   
     if (!details) {
       return {
@@ -39,7 +59,7 @@ export async function generateMetadata({ params }: MoviePageProps) {
 
 export default async function MoviePage({ params }: MoviePageProps) {
   const path = params.slug.join('/');
-  const details = await getMovieDetails(path);
+  const details = await getMovieDetailsFromApi(path);
 
   if (!details) {
     notFound();
