@@ -75,6 +75,12 @@ const nextConfig: NextConfig = {
         hostname: 'www.themoviedb.org',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'imagetot.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
