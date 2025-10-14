@@ -4,19 +4,26 @@ import type { Movie } from '@/lib/types';
 export const revalidate = 3600; // Revalidate every hour
 
 async function getHomepageMoviesFromApi(): Promise<Movie[]> {
-    // This is not a real URL, so it will be called from the server-side, not the client-side.
-    // The domain `netvlyx.vercel.app` is just a placeholder.
     // In a real environment, we would use an environment variable for the base URL.
+    // Using a placeholder for local development that points to our own API route.
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
     try {
-        const res = await fetch('https://netvlyx.vercel.app/api/scrape', { next: { revalidate: 3600 }});
+        const res = await fetch(`${baseUrl}/api/scrape`, { 
+            next: { revalidate: 3600 },
+            headers: {
+                'Accept': 'application/json',
+            }
+        });
         if (!res.ok) {
-            console.error("Failed to fetch movies from API");
+            console.error("Failed to fetch movies from API", res.status, res.statusText);
+            const errorBody = await res.text();
+            console.error("Error body:", errorBody);
             return [];
         }
         const data = await res.json();
         return data.movies;
     } catch(e) {
-        console.error(e);
+        console.error("Error fetching from /api/scrape:", e);
         return [];
     }
 }
@@ -38,7 +45,7 @@ export default async function Home() {
         </div>
       ) : (
         <div className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed border-muted">
-          <p className="text-muted-foreground">Could not load movies. The source site might be down or has changed its structure.</p>
+          <p className="text-center text-muted-foreground">Could not load movies. The source site might be down or has changed its structure. <br/> Check the server logs for more details.</p>
         </div>
       )}
     </div>
