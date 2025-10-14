@@ -1,10 +1,29 @@
-import { getHomepageMovies } from '@/lib/actions';
 import { MovieCard } from '@/components/MovieCard';
+import type { Movie } from '@/lib/types';
 
 export const revalidate = 3600; // Revalidate every hour
 
+async function getHomepageMoviesFromApi(): Promise<Movie[]> {
+    // This is not a real URL, so it will be called from the server-side, not the client-side.
+    // The domain `netvlyx.vercel.app` is just a placeholder.
+    // In a real environment, we would use an environment variable for the base URL.
+    try {
+        const res = await fetch('https://netvlyx.vercel.app/api/scrape', { next: { revalidate: 3600 }});
+        if (!res.ok) {
+            console.error("Failed to fetch movies from API");
+            return [];
+        }
+        const data = await res.json();
+        return data.movies;
+    } catch(e) {
+        console.error(e);
+        return [];
+    }
+}
+
+
 export default async function Home() {
-  const movies = await getHomepageMovies();
+  const movies = await getHomepageMoviesFromApi();
 
   return (
     <div className="container mx-auto px-4 py-8">
