@@ -40,6 +40,8 @@ export interface MovieDetails extends Movie {
   };
   screenshots?: string[];
   qualities?: { name: string; size: string }[];
+  stars?: string;
+  director?: string;
 }
 
 export interface Category {

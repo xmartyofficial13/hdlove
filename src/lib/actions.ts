@@ -141,11 +141,20 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     if (text.match(/Genre:|Genres:/)) {
         movieInfo.category = text.replace(/Genre:|Genres:/, '').trim();
     }
+     if (text.match(/Director:/)) {
+        movieInfo.director = text.replace(/Director:/, '').trim();
+    }
+     if (text.match(/Stars:|Creator:/)) {
+        movieInfo.stars = text.replace(/Stars:|Creator:/, '').trim();
+    }
     if (text.match(/Language:/)) {
         movieInfo.language = text.replace('Language:', '').trim();
     }
     if (text.match(/Release Date:/)) {
         movieInfo.releaseDate = text.replace('Release Date:', '').trim();
+    }
+     if (text.match(/Quality:/)) {
+        movieInfo.qualities = text.replace('Quality:', '').split('|').map(q => ({ name: q.trim(), size: 'N/A' }));
     }
   });
 

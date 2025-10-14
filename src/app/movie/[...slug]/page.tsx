@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
-import { AlertCircle, Calendar, Clapperboard, Download, Languages, Star, Youtube } from 'lucide-react';
+import { AlertCircle, Calendar, Clapperboard, Download, Languages, Star, Youtube, Film, User, Video } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -64,6 +64,21 @@ export async function generateMetadata({ params }: MoviePageProps) {
     }
 }
 
+const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string | React.ReactNode }) => {
+  if (!value) return null;
+  return (
+    <div className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50">
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-muted-foreground">{label}</p>
+        <div className="text-base font-medium text-white">{value}</div>
+      </div>
+    </div>
+  );
+};
+
 export default async function MoviePage({ params }: MoviePageProps) {
   const path = params.slug.join('/');
   const details = await getMovieDetailsFromApi(path);
@@ -95,35 +110,27 @@ export default async function MoviePage({ params }: MoviePageProps) {
             {details.title}
           </h1>
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
-             {details.rating && (
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-primary" />
-                <span className="font-semibold text-white">{details.rating}</span>
-                <span className="text-sm">/ 10 IMDb</span>
-              </div>
-            )}
-            {details.category && <Badge variant="outline">{details.category.split('|')[0].trim()}</Badge>}
-            {details.language && (
-                <div className="flex items-center gap-2">
-                    <Languages className="h-5 w-5" />
-                    <span>{details.language}</span>
-                </div>
-            )}
-            {details.releaseDate && (
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                <span>{details.releaseDate}</span>
-              </div>
-            )}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {details.category?.split('|').map(cat => (
+                <Badge key={cat} variant="outline" className="transition-colors hover:bg-primary/20">{cat.trim()}</Badge>
+            ))}
           </div>
 
           <p className="mt-6 font-body leading-7 text-muted-foreground">
             {details.description}
           </p>
           
+          <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+            <DetailItem icon={<Star className="h-5 w-5" />} label="iMDB Rating" value={details.rating ? `${details.rating}/10` : 'N/A'} />
+            <DetailItem icon={<Calendar className="h-5 w-5" />} label="Release Date" value={details.releaseDate} />
+            <DetailItem icon={<Languages className="h-5 w-5" />} label="Language" value={details.language} />
+            <DetailItem icon={<Film className="h-5 w-5" />} label="Director" value={details.director} />
+            <DetailItem icon={<User className="h-5 w-5" />} label="Stars" value={details.stars} />
+            <DetailItem icon={<Video className="h-5 w-5" />} label="Quality" value={details.qualities?.map(q => q.name).join(' | ')} />
+          </div>
+
           {details.trailer?.url && (
-            <a href={details.trailer.url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-red-600/20 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600/40">
+            <a href={details.trailer.url} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-red-600/20 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600/40">
               <Youtube className="h-6 w-6 text-red-500" />
               Watch Trailer
             </a>
