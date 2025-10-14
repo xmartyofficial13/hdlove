@@ -51,6 +51,24 @@ const nextConfig: NextConfig = {
         hostname: 'hdhub4u.cologne',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'catimages.org',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'imgshare.info',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
