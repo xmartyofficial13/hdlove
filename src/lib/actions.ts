@@ -177,7 +177,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const downloadLinks: DownloadLink[] = [];
   
   // This selector is for direct movie download links (not episodes)
-  $('p.Dwnl, .dwn-btns p, div.dwn-links .dwn-link, .page-body h3, .page-body h4').find('a').each((_, element) => {
+  $('.page-body h3 a, .page-body h4 a').each((_, element) => {
     const url = $(element).attr('href');
     const qualityText = $(element).text().trim();
     
@@ -247,9 +247,9 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
 
   const screenshots: string[] = [];
-  $('img.alignnone, h2:contains("Screen-Shots") + h3 > a > img, .entry-content img, .page-body img').each((_, el) => {
+  $('img.alignnone, h2:contains("Screen-Shots") + h3 > a > img, .entry-content img.alignnone, .page-body img.alignnone').each((_, el) => {
     const src = $(el).attr('src');
-    if (src && !screenshots.includes(src) && ($(el).hasClass('alignnone') || $(el).attr('decoding') === 'async')) {
+    if (src && !screenshots.includes(src)) {
         screenshots.push(src);
     }
   });
