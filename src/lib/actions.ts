@@ -99,6 +99,9 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   if (!html) return null;
 
   const $ = cheerio.load(html);
+  
+  // Exclude ad blocks and other irrelevant sections
+  $('.code-block').remove();
 
   const title = $('h1.page-title .material-text').text().trim() || $('h1.Title').text().trim() || $('.kno-ecr-pt').first().text().trim();
   const imageUrl = $('div.Image figure img').attr('src') || $('div.post-thumbnail figure img').attr('src') || $('p > img.aligncenter').first().attr('src') || '';
