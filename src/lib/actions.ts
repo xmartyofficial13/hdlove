@@ -111,6 +111,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       '.PZPZlf.hb8SAc .kno-rdesc',
       'div.page-body > p:first-of-type > span > em',
       'div.page-body > p:contains("DESCRIPTION:") + p',
+      'div.kno-rdesc',
   ];
 
   for (const selector of descriptionSelectors) {
@@ -123,7 +124,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   
   const movieInfo: Partial<MovieDetails> = {};
   
-  $('.kp-hc .mod, .tec-info, .page-body > div').each((_, el) => {
+  $('.kp-hc .mod, .tec-info, .page-body > div, .page-body > p').each((_, el) => {
     const element = $(el);
     let text = element.text();
     
@@ -164,11 +165,12 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   }
 
   const downloadLinks: DownloadLink[] = [];
-  $('div.ind-btn a, p > a[href*="viralkhabarbull.com"], .kp-header a').each((_, element) => {
+  // This selector is for direct movie download links (not episodes)
+  $('p.Dwnl, .dwn-btns p, div.dwn-links .dwn-link').find('a').each((_, element) => {
     const url = $(element).attr('href');
     const qualityText = $(element).text().trim();
     
-    if (url && qualityText && !qualityText.toLowerCase().includes('watch') && url !== '/') {
+    if (url && qualityText && url.startsWith('http')) {
         downloadLinks.push({ 
           quality: qualityText, 
           url,
@@ -177,7 +179,9 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     }
   });
 
+
   const episodeList: Episode[] = [];
+  // This selector is for episodes (TV series)
   $('.entry-content h3, .page-body h3, .entry-content h2, .page-body h2').filter((_, el) => {
       const text = $(el).text().toLowerCase();
       const hasLinks = $(el).find('a').length > 0 || $(el).nextUntil('h3, h2').find('a').length > 0;
@@ -192,7 +196,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       episodeTitle = `Part ${i + 1}`;
     }
 
-
     let container: cheerio.Cheerio<cheerio.Element> = header;
     // Find the actual container of links. It might be the header itself, a following <p>, or a sibling `div`.
     if(header.find('a').length === 0) {
@@ -204,7 +207,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       const href = link.attr('href');
       const text = link.text().trim();
       
-      if (href && text && href !== '/') {
+      if (href && text && href !== '/' && href.startsWith('http')) {
         episodeLinks.push({
           title: text,
           url: href,
@@ -232,9 +235,9 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
 
   const screenshots: string[] = [];
-  $('img.alignnone, h2:contains("Screen-Shots") + h3 > a > img').each((_, el) => {
+  $('img.alignnone, h2:contains("Screen-Shots") + h3 > a > img, .entry-content img').each((_, el) => {
     const src = $(el).attr('src');
-    if (src && !screenshots.includes(src)) {
+    if (src && !screenshots.includes(src) && $(el).hasClass('alignnone')) {
         screenshots.push(src);
     }
   });
