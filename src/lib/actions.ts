@@ -211,6 +211,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
   $('.entry-content h3, .page-body h3, .entry-content h2, .page-body h2').filter((_, el) => {
       const text = $(el).text().toLowerCase();
+      if (text.includes('how to download')) return false;
       const nextElements = $(el).nextUntil('h3, h2');
       const hasLinks = $(el).find('a').length > 0 || nextElements.find('a').length > 0;
       return (text.includes('episode') || text.includes('season')) && hasLinks && !text.includes('download links');
