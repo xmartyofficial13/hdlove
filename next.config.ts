@@ -69,6 +69,12 @@ const nextConfig: NextConfig = {
         hostname: 'imgshare.info',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.themoviedb.org',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
