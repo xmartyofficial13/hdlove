@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
-import { AlertCircle, Clapperboard, Download, Languages, Star, Youtube } from 'lucide-react';
+import { AlertCircle, Calendar, Clapperboard, Download, Languages, Star, Youtube } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -88,7 +88,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
             {details.title}
           </h1>
 
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-muted-foreground">
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
              {details.rating && (
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-primary" />
@@ -103,7 +103,12 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     <span>{details.language}</span>
                 </div>
             )}
-            {details.releaseDate && <Badge variant="secondary">{new Date(details.releaseDate).getFullYear()}</Badge>}
+            {details.releaseDate && (
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                <span>{details.releaseDate}</span>
+              </div>
+            )}
           </div>
 
           <p className="mt-6 font-body leading-7 text-muted-foreground">

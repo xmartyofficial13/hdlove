@@ -101,7 +101,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
   const $ = cheerio.load(html);
 
-  const title = $('h1.Title').text().trim() || $('.kno-ecr-pt').first().text().trim();
+  const title = $('h1.page-title .material-text').text().trim() || $('h1.Title').text().trim() || $('.kno-ecr-pt').first().text().trim();
   const imageUrl = $('div.Image figure img').attr('src') || $('div.post-thumbnail figure img').attr('src') || $('p > img.aligncenter').first().attr('src') || '';
   
   let description = "No description available.";
@@ -110,6 +110,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       'div.Description p',
       'p:contains("DESCRIPTION") + p',
       '.PZPZlf.hb8SAc .kno-rdesc',
+      'div.page-body > p:first-of-type > span > em',
   ];
 
   for (const selector of descriptionSelectors) {
@@ -119,6 +120,14 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
           break;
       }
   }
+  
+  if(description === "No description available."){
+      const storyLineHeader = $('h2:contains("Storyline:")');
+      if(storyLineHeader.length > 0) {
+        description = storyLineHeader.next('div').text().trim();
+      }
+  }
+
 
   const movieInfo: Partial<MovieDetails> = {};
   
