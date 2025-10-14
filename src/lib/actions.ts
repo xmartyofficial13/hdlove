@@ -51,7 +51,7 @@ function parseMovies(html: string): Movie[] {
     const title = img.attr('alt') || $(element).find('p').text().trim() || $(element).find('h2.Title a').text().trim();
     const imageUrl = img.attr('src') || '';
 
-    if (path && title && imageUrl && !seenPaths.has(path)) {
+    if (path && title && imageUrl && !seenPaths.has(path) && path !== '/') {
       movies.push({ title, imageUrl, path });
       seenPaths.add(path);
     }
@@ -70,8 +70,6 @@ export async function getHomepageMovies(): Promise<Movie[]> {
   const html = await fetchHtml(BASE_URL);
   if (!html) return [];
   const movies = parseMovies(html);
-  // The user's example had a category field, but it's not clear where to get it from on the homepage.
-  // This will be scraped on the detail page instead.
   return movies.map(movie => ({
       ...movie,
       description: movie.title, 
@@ -105,46 +103,46 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const imageUrl = $('div.Image figure img').attr('src') || $('div.post-thumbnail figure img').attr('src') || $('p > img.aligncenter').first().attr('src') || '';
   
   let description = "No description available.";
+  
   const descriptionSelectors = [
       'div.kno-rdesc > div > span',
       'div.Description p',
-      'p:contains("DESCRIPTION") + p',
+      'h2:contains("Storyline:") + div',
       '.PZPZlf.hb8SAc .kno-rdesc',
       'div.page-body > p:first-of-type > span > em',
+      'div.page-body > p:contains("DESCRIPTION:") + p',
   ];
 
   for (const selector of descriptionSelectors) {
-      const foundDesc = $(selector).first().text().trim();
+      let foundDesc = $(selector).first().text().trim();
       if (foundDesc) {
           description = foundDesc;
           break;
       }
   }
   
-  if(description === "No description available."){
-      const storyLineHeader = $('h2:contains("Storyline:")');
-      if(storyLineHeader.length > 0) {
-        description = storyLineHeader.next('div').text().trim();
-      }
-  }
-
-
   const movieInfo: Partial<MovieDetails> = {};
   
   $('.kp-hc .mod, .tec-info, .page-body > div').each((_, el) => {
     const element = $(el);
-    const text = element.text();
+    let text = element.text();
     
-    if (text.includes('iMDB Rating:')) {
+    // Clean up text by removing child element text
+    element.children().each((_, child) => {
+        text = text.replace($(child).text(), '');
+    });
+    text = text.trim();
+
+    if (text.match(/iMDB Rating:\s*([0-9.]+)/)) {
         movieInfo.rating = text.match(/iMDB Rating:\s*([0-9.]+)/)?.[1];
     }
-    if (text.includes('Genre:')) {
+    if (text.match(/Genre:|Genres:/)) {
         movieInfo.category = text.replace(/Genre:|Genres:/, '').trim();
     }
-    if (text.includes('Language:')) {
+    if (text.match(/Language:/)) {
         movieInfo.language = text.replace('Language:', '').trim();
     }
-    if (text.includes('Release Date:')) {
+    if (text.match(/Release Date:/)) {
         movieInfo.releaseDate = text.replace('Release Date:', '').trim();
     }
   });
@@ -158,7 +156,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   });
   
   if (!movieInfo.category) {
-      const categories = $('.page-meta a[data-wpel-link="internal"] .material-text')
+      const categories = $('.page-meta a[href*="/category/"]')
         .map((_, el) => $(el).text().trim())
         .get()
         .join(' | ');
@@ -166,11 +164,11 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   }
 
   const downloadLinks: DownloadLink[] = [];
-  $('div.ind-btn a, p > a[href*="viralkhabarbull.com"]').each((_, element) => {
+  $('div.ind-btn a, p > a[href*="viralkhabarbull.com"], .kp-header a').each((_, element) => {
     const url = $(element).attr('href');
     const qualityText = $(element).text().trim();
     
-    if (url && qualityText && !qualityText.toLowerCase().includes('watch')) {
+    if (url && qualityText && !qualityText.toLowerCase().includes('watch') && url !== '/') {
         downloadLinks.push({ 
           quality: qualityText, 
           url,
@@ -182,62 +180,50 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const episodeList: Episode[] = [];
   $('.entry-content h3, .page-body h3, .entry-content h2, .page-body h2').filter((_, el) => {
       const text = $(el).text().toLowerCase();
-      return (text.includes('episode') || text.includes('episodes')) && ($(el).find('a').length > 0 || $(el).nextUntil('h3, h2').find('a').length > 0);
+      const hasLinks = $(el).find('a').length > 0 || $(el).nextUntil('h3, h2').find('a').length > 0;
+      return (text.includes('episode') || text.includes('download')) && hasLinks;
   }).each((i, element) => {
     const header = $(element);
     const episodeLinks: DownloadLink[] = [];
     
     // Extract title but remove extra text like "DOWNLOAD LINKS"
-    const episodeTitle = header.text().split(/\||:|\–/)[0].replace(/Download Links/i, '').trim();
-
-    let current = header;
-    let linkContainer = header.nextUntil('h3, h2, hr');
-
-    // If the header itself has links, use them
-    if (header.find('a').length > 0) {
-        linkContainer = header;
-    } else if (linkContainer.find('a').length === 0) {
-        // If the immediate next elements don't have links, check after a horizontal rule
-        linkContainer = header.nextAll('hr').first().nextUntil('h3, h2, hr');
+    let episodeTitle = header.text().split(/\||:|\–/)[0].replace(/Download Links/i, '').trim();
+    if (!episodeTitle) {
+      episodeTitle = `Part ${i + 1}`;
     }
 
-    linkContainer.find('a').each((_, linkEl) => {
+
+    let container: cheerio.Cheerio<cheerio.Element> = header;
+    // Find the actual container of links. It might be the header itself, a following <p>, or a sibling `div`.
+    if(header.find('a').length === 0) {
+      container = header.nextUntil('h3, h2, hr');
+    }
+
+    container.find('a').each((_, linkEl) => {
       const link = $(linkEl);
       const href = link.attr('href');
-      const linkText = link.parent().text().trim() || link.text().trim();
-      const title = link.text().trim();
+      const text = link.text().trim();
       
-      if (href && title) {
+      if (href && text && href !== '/') {
         episodeLinks.push({
-          title: title,
+          title: text,
           url: href,
-          quality: linkText.toLowerCase().includes('watch') ? 'Watch Online' : title,
+          quality: text,
         });
       }
     });
     
-    // Special handling for the structure where links are inside sibling h3s
-    if (episodeLinks.length === 0) {
-        header.nextUntil('h3, h2, hr').filter('h3').each((_, linkEl) => {
-            const link = $(linkEl).find('a').first();
-            const href = link.attr('href');
-            const title = $(linkEl).text().trim();
-            if(href && title) {
-                 episodeLinks.push({
-                     title: title,
-                     url: href,
-                     quality: title,
-                 });
-            }
-        });
-    }
-    
     if (episodeLinks.length > 0) {
-      episodeList.push({
-        number: i + 1,
-        title: episodeTitle,
-        downloadLinks: episodeLinks,
-      });
+      const existingEpisode = episodeList.find(e => e.title.toLowerCase() === episodeTitle.toLowerCase());
+      if (existingEpisode) {
+        existingEpisode.downloadLinks.push(...episodeLinks);
+      } else {
+        episodeList.push({
+            number: i + 1,
+            title: episodeTitle,
+            downloadLinks: episodeLinks,
+        });
+      }
     }
   });
 
@@ -246,9 +232,9 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const trailer: MovieDetails['trailer'] = trailerUrl ? { url: trailerUrl } : undefined;
 
   const screenshots: string[] = [];
-  $('h2:contains("Screen-Shots"), h3:contains("Screen-Shots")').first().nextUntil('h2, h3, hr').find('img, a > img').each((_, el) => {
+  $('img.alignnone, h2:contains("Screen-Shots") + h3 > a > img').each((_, el) => {
     const src = $(el).attr('src');
-    if (src) {
+    if (src && !screenshots.includes(src)) {
         screenshots.push(src);
     }
   });
@@ -281,7 +267,7 @@ export async function getCategories(): Promise<Category[]> {
         const mainLink = $(element).children('a');
         const name = mainLink.text().trim();
         const path = mainLink.attr('href')?.replace(BASE_URL, '') || '';
-        if(name && path && !['Home', 'More'].includes(name) && !seen.has(name)) {
+        if(name && path && !['Home', 'More'].includes(name) && !seen.has(name) && path !== '/') {
             categories.push({ name, path });
             seen.add(name);
         }
@@ -291,7 +277,7 @@ export async function getCategories(): Promise<Category[]> {
              const subLink = $(subElement).children('a');
              const subName = subLink.text().trim();
              const subPath = subLink.attr('href')?.replace(BASE_URL, '') || '';
-             if(subName && subPath && !seen.has(subName)) {
+             if(subName && subPath && !seen.has(subName) && subPath !== '/') {
                 categories.push({ name: subName, path: subPath });
                 seen.add(subName);
              }

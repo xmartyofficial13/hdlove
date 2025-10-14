@@ -11,6 +11,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import type { MovieDetails } from '@/lib/types';
 
 
@@ -172,14 +179,31 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
           {details.screenshots && details.screenshots.length > 0 && (
             <div className="mt-12">
-              <h2 className="font-headline text-2xl font-semibold text-white">Screenshots</h2>
-              <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                {details.screenshots.map((src, index) => (
-                  <div key={index} className="relative aspect-video overflow-hidden rounded-lg">
-                    <Image src={src} alt={`Screenshot ${index + 1}`} fill className="object-cover transition-transform duration-300 hover:scale-105" />
-                  </div>
-                ))}
-              </div>
+                <h2 className="font-headline text-2xl font-semibold text-white">Screenshots</h2>
+                <Carousel
+                    opts={{
+                    align: "start",
+                    loop: true,
+                    }}
+                    className="w-full mt-4"
+                >
+                    <CarouselContent>
+                    {details.screenshots.map((src, index) => (
+                        <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                            <div className="relative aspect-video overflow-hidden rounded-lg">
+                                <Image 
+                                    src={src} 
+                                    alt={`Screenshot ${index + 1}`} 
+                                    fill 
+                                    className="object-cover transition-transform duration-300 hover:scale-105" 
+                                />
+                            </div>
+                        </CarouselItem>
+                    ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="ml-12" />
+                    <CarouselNext className="mr-12" />
+                </Carousel>
             </div>
           )}
           
