@@ -69,8 +69,8 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const $ = cheerio.load(html);
 
   const title = $('h1.Title').text().trim();
-  const imageUrl = $('div.Image figure img').attr('src') || '';
-  const description = $('div.Description p').text().trim();
+  const imageUrl = $('div.Image figure img').attr('src') || $('div.post-thumbnail figure img').attr('src') || '';
+  const description = $('div.Description p').first().text().trim();
 
   const downloadLinks: DownloadLink[] = [];
   
@@ -86,6 +86,43 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
         downloadLinks.push({ quality: cleanedQuality, url });
     }
   });
+
+  if (downloadLinks.length === 0) {
+    // Fallback for episode links
+    $('.page-body h3, .entry-content h3').each((_, element) => {
+        const h3 = $(element);
+        const links = h3.find('a');
+        let downloadUrl: string | undefined;
+        let watchUrl: string | undefined;
+        let episodeText: string = '';
+
+        links.each((_, linkEl) => {
+            const link = $(linkEl);
+            const linkText = link.text().trim().toLowerCase();
+            const href = link.attr('href');
+
+            if (linkText.includes('watch')) {
+                watchUrl = href;
+            } else if (href) {
+                downloadUrl = href;
+                if (!episodeText || !episodeText.toLowerCase().includes('episode')) {
+                  episodeText = link.text().trim();
+                }
+            }
+        });
+        
+        if (!episodeText) {
+          episodeText = h3.text().split('|')[0].trim();
+        }
+
+        if (downloadUrl) {
+            downloadLinks.push({ quality: episodeText, url: downloadUrl });
+        }
+        if (watchUrl) {
+            downloadLinks.push({ quality: `${episodeText} (Watch)`, url: watchUrl });
+        }
+    });
+  }
 
   if (!title) return null;
 
