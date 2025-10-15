@@ -4,6 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/Header';
 import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/components/layout/ThemeProvider';
 
 const fontBody = Inter({
   subsets: ['latin'],
@@ -17,7 +18,7 @@ const fontHeadline = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'NetVlyx',
+  title: 'Hdhub4u',
   description: 'Your ad-free streaming companion',
 };
 
@@ -27,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           'antialiased',
@@ -35,11 +36,18 @@ export default function RootLayout({
           fontHeadline.variable
         )}
       >
-        <div className="relative flex min-h-screen w-full flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-        </div>
-        <Toaster />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="relative flex min-h-screen w-full flex-col">
+            <Header />
+            <main className="flex-1">{children}</main>
+          </div>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
