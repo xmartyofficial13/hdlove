@@ -1,22 +1,16 @@
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
-import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
+import { AlertCircle, Calendar, Eye, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import type { MovieDetails } from '@/lib/types';
 import { getMovieDetails } from '@/lib/actions';
 
@@ -131,31 +125,33 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
           {details.screenshots && details.screenshots.length > 0 && (
             <div className="mt-12">
-                <h2 className="font-headline text-2xl font-semibold text-foreground">Screenshots</h2>
-                <Carousel
-                    opts={{
-                    align: "start",
-                    loop: true,
-                    }}
-                    className="w-full mt-4"
-                >
-                    <CarouselContent>
-                    {details.screenshots.map((src, index) => (
-                        <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                            <div className="relative aspect-video overflow-hidden rounded-lg">
-                                <img 
-                                    src={src} 
-                                    alt={`Screenshot ${index + 1}`} 
-                                    className="h-full w-full object-cover transition-transform duration-300 hover:scale-105" 
-                                    loading="lazy"
-                                />
+              <div className="mb-6 text-center">
+                <h2 className="font-headline text-2xl font-semibold text-foreground">Get a preview of the visual quality and scenes</h2>
+              </div>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-2">
+                    {details.screenshots.slice(0, 6).map((src, index) => (
+                        <div key={index} className="relative aspect-video overflow-hidden rounded-lg group">
+                             <img 
+                                src={src} 
+                                alt={`Screenshot ${index + 1}`} 
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                                loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-black/10"></div>
+                            <div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-xs font-bold text-white">
+                                {index + 1}
                             </div>
-                        </CarouselItem>
+                        </div>
                     ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="ml-12" />
-                    <CarouselNext className="mr-12" />
-                </Carousel>
+                </div>
+                 {details.screenshots.length > 6 && (
+                    <div className="mt-6 flex justify-center">
+                        <Button variant="outline">
+                            <Eye className="mr-2 h-4 w-4" />
+                            View All Screenshots
+                        </Button>
+                    </div>
+                )}
             </div>
           )}
           
