@@ -239,3 +239,5 @@ export default async function MoviePage({ params }: MoviePageProps) {
     </div>
   );
 }
+
+    

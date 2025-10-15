@@ -8,7 +8,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from '../ui/button';
-import { Menu, Clapperboard } from 'lucide-react';
+import { Menu, Clapperboard, User } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 
 export async function Header() {
@@ -32,7 +33,7 @@ export async function Header() {
           <SheetContent side="left" className="pr-0">
              <Link href="/" className="flex items-center space-x-2 px-6">
                 <Clapperboard className="h-6 w-6 text-primary" />
-                <span className="font-bold font-headline">NetVlyx</span>
+                <span className="font-bold font-headline">Hdhub4u</span>
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] overflow-y-auto pb-10 pl-6">
               <div className="flex flex-col space-y-3">
@@ -64,10 +65,17 @@ export async function Header() {
             </nav>
         </div>
 
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2">
           <div className="w-full flex-1 md:w-auto md:flex-none">
              <SearchBar />
           </div>
+          <ThemeToggle />
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/profile">
+              <User className="h-5 w-5" />
+              <span className="sr-only">Profile</span>
+            </Link>
+          </Button>
         </div>
       </div>
     </header>
