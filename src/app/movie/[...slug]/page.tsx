@@ -1,4 +1,3 @@
-
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
 import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
@@ -215,5 +214,3 @@ export default async function MoviePage({ params }: MoviePageProps) {
     </div>
   );
 }
-
-    
