@@ -66,8 +66,8 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="flex flex-col gap-8 md:flex-row">
-        <div className="w-full shrink-0 md:w-1/4">
+      <div className="flex flex-row gap-4 md:gap-8">
+        <div className="w-1/3 shrink-0 md:w-1/4">
           <div className="sticky top-24">
             <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-2xl shadow-primary/10">
               <img
@@ -79,8 +79,8 @@ export default async function MoviePage({ params }: MoviePageProps) {
             </div>
           </div>
         </div>
-        <div className="w-full md:w-3/4">
-          <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <div className="w-2/3 md:w-3/4">
+          <h1 className="font-headline text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {details.title}
           </h1>
 
@@ -98,11 +98,11 @@ export default async function MoviePage({ params }: MoviePageProps) {
             })}
           </div>
 
-          <p className="mt-6 font-body leading-7 text-muted-foreground">
+          <p className="mt-4 font-body text-sm leading-relaxed text-muted-foreground md:text-base md:leading-7">
             {details.description}
           </p>
           
-          <div className="mt-8 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
             <DetailItem icon={<Star className="h-5 w-5" />} label="iMDB Rating" value={details.rating ? `${details.rating}/10` : 'N/A'} />
             <DetailItem icon={<Calendar className="h-5 w-5" />} label="Release Date" value={details.releaseDate} />
             <DetailItem icon={<Languages className="h-5 w-5" />} label="Language" value={details.language} />
@@ -112,7 +112,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
           </div>
 
           {details.trailer?.url && (
-            <a href={details.trailer.url} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-red-600/20 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600/40">
+            <a href={details.trailer.url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-red-600/20 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600/40">
               <Youtube className="h-6 w-6 text-red-500" />
               Watch Trailer
             </a>
