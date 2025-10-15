@@ -20,7 +20,7 @@ import {
 import type { MovieDetails } from '@/lib/types';
 import { getMovieDetails } from '@/lib/actions';
 
-export const revalidate = 86400; // Revalidate once a day
+export const revalidate = 3600; // Revalidate every hour
 
 interface MoviePageProps {
   params: {
@@ -93,12 +93,17 @@ export default async function MoviePage({ params }: MoviePageProps) {
           </h1>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            {details.category?.split('|').map(cat => (
-                <Badge key={cat} variant="outline" className="transition-colors hover:bg-primary/20">
+            {details.category?.split('|').map(cat => {
+              // Clean the category name from unwanted characters
+              const cleanedCat = cat.replace(//g, '').trim();
+              if (!cleanedCat) return null;
+              return (
+                <Badge key={cleanedCat} variant="outline" className="transition-colors hover:bg-primary/20">
                   <Tag className="mr-1 h-3 w-3" />
-                  {cat.trim()}
+                  {cleanedCat}
                 </Badge>
-            ))}
+              )
+            })}
           </div>
 
           <p className="mt-6 font-body leading-7 text-muted-foreground">
