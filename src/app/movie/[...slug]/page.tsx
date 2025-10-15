@@ -1,6 +1,7 @@
+
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
-import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube } from 'lucide-react';
+import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -95,7 +96,10 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {details.category?.split('|').map(cat => (
-                <Badge key={cat} variant="outline" className="transition-colors hover:bg-primary/20">{cat.trim()}</Badge>
+                <Badge key={cat} variant="outline" className="transition-colors hover:bg-primary/20">
+                  <Tag className="mr-1 h-3 w-3" />
+                  {cat.trim()}
+                </Badge>
             ))}
           </div>
 
@@ -224,3 +228,5 @@ export default async function MoviePage({ params }: MoviePageProps) {
     </div>
   );
 }
+
+    
