@@ -20,10 +20,10 @@ export function MovieCard({ movie, className }: MovieCardProps) {
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
             />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/0 to-transparent"></div>
           </div>
           <div className="p-3">
-            <h3 className="truncate font-body text-sm font-semibold text-foreground">
+            <h3 className="font-body text-sm font-semibold text-foreground">
               {movie.title}
             </h3>
           </div>
