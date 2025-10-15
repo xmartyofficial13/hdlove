@@ -107,6 +107,7 @@ export async function getCategoryMovies(path: string, page: number = 1): Promise
     const cleanPath = path.startsWith('/') ? path.substring(1) : path;
     const pagePath = page > 1 ? `/page/${page}` : '';
     const url = `${BASE_URL}/${cleanPath}${pagePath}`;
+    console.log(`Scraping category page: ${url}`);
     const html = await fetchHtml(url);
     if (!html) return [];
     return parseMovies(html);
@@ -114,7 +115,7 @@ export async function getCategoryMovies(path: string, page: number = 1): Promise
 
 
 export async function getMovieDetails(path: string): Promise<MovieDetails | null> {
-  const url = `${BASEURL}${path.startsWith('/') ? path : `/${path}`}`;
+  const url = `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
   const html = await fetchHtml(url);
   if (!html) return null;
 
@@ -334,9 +335,12 @@ export async function getCategories(): Promise<Category[]> {
     $('#menu-primary-menu > li.menu-item-has-children').each((_, element) => {
         const mainLink = $(element).children('a');
         const name = mainLink.text().trim();
-        const path = mainLink.attr('href')?.replace(BASE_URL, '') || '';
+        let path = mainLink.attr('href')?.replace(BASE_URL, '') || '';
+        if (path.startsWith('/')) {
+            path = path.substring(1);
+        }
         if(name && path && !['Home', 'More'].includes(name) && !seen.has(name) && path !== '/') {
-            categories.push({ name, path });
+            categories.push({ name, path: `/category/${path}` });
             seen.add(name);
         }
 
@@ -344,9 +348,12 @@ export async function getCategories(): Promise<Category[]> {
         $(element).find('ul.sub-menu > li').each((_, subElement) => {
              const subLink = $(subElement).children('a');
              const subName = subLink.text().trim();
-             const subPath = subLink.attr('href')?.replace(BASE_URL, '') || '';
+             let subPath = subLink.attr('href')?.replace(BASE_URL, '') || '';
+             if (subPath.startsWith('/')) {
+                subPath = subPath.substring(1);
+             }
              if(subName && subPath && !seen.has(subName) && subPath !== '/') {
-                categories.push({ name: subName, path: subPath });
+                categories.push({ name: subName, path: `/category/${subPath}` });
                 seen.add(subName);
              }
         });
@@ -374,4 +381,3 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
-
