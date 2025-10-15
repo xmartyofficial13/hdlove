@@ -17,13 +17,15 @@ interface CategoryPageProps {
 }
 
 // Function to generate metadata
-export async function generateMetadata({ params }: { params: { slug: string[] } }) {
+export async function generateMetadata({ params, searchParams }: CategoryPageProps) {
   const slug = params.slug || [];
   const path = slug.join('/');
   // Capitalize each part of the slug for the title
   const title = slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
+  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
+
   return {
-    title: `${title} - NetVlyx`,
+    title: `${title}${page > 1 ? ` - Page ${page}` : ''} - NetVlyx`,
   };
 }
 

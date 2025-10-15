@@ -21,7 +21,7 @@ export async function Header() {
                 {categories.slice(0, 5).map((category) => (
                     <Link
                         key={category.path}
-                        href={`/category${category.path}`}
+                        href={category.path.startsWith('/') ? category.path : `/${category.path}`}
                         className="transition-colors hover:text-foreground/80 text-foreground/60"
                         prefetch={false}
                     >
