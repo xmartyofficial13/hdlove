@@ -12,7 +12,7 @@ interface DownloadButtonProps {
 
 export function DownloadButton({ link }: DownloadButtonProps) {
   const router = useRouter();
-  const isWatchLink = link.quality.toLowerCase().includes('watch') || link.url.includes('hdstream') || link.url.includes('hubdrive');
+  const isWatchLink = link.quality.toLowerCase().includes('watch') || link.url.includes('hdstream');
 
   const handleWatchClick = () => {
     router.push(`/player?url=${encodeURIComponent(link.url)}`);
