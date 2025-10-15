@@ -44,31 +44,6 @@ export async function GET(request: Request) {
     // Add a base tag to resolve relative paths
     const origin = new URL(cleanUrl).origin;
     $('head').prepend(`<base href="${origin}">`);
-    
-    // Inject CSS to hide everything except the video player
-    const styles = `
-      <style>
-        body > * {
-          display: none !important;
-        }
-        #vplayer {
-          display: block !important;
-          position: fixed !important;
-          top: 0;
-          left: 0;
-          width: 100vw;
-          height: 100vh;
-          z-index: 999999;
-          background-color: #000;
-        }
-        html, body {
-          overflow: hidden !important;
-          background-color: #000 !important;
-        }
-      </style>
-    `;
-    $('head').append(styles);
-
 
     return new Response($.html(), {
         headers: { 'Content-Type': 'text/html' },
