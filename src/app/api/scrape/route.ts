@@ -30,7 +30,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch source' }, { status: 500 });
     }
     const $ = cheerio.load(html);
-    $('script').remove();
+    
+    // Selectively remove ad-related script tags
+    $('script').each((i, el) => {
+      const src = $(el).attr('src');
+      if (src) {
+        if (src.includes('/ad?') || src.includes('accoyblee.com') || src.includes('bvtpk.com')) {
+          $(el).remove();
+        }
+      }
+    });
+
     // Add a base tag to resolve relative paths
     const origin = new URL(cleanUrl).origin;
     $('head').prepend(`<base href="${origin}">`);
