@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { getHomepageMovies } from '@/lib/actions';
 import * as cheerio from 'cheerio';
