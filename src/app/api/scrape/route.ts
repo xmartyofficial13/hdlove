@@ -31,6 +31,16 @@ export async function GET(request: Request) {
     }
     const $ = cheerio.load(html);
     
+    // Selectively remove ad-related script tags
+    $('script').each((i, el) => {
+      const src = $(el).attr('src');
+      if (src) {
+        if (src.includes('/ad?') || src.includes('accoyblee.com') || src.includes('bvtpk.com') || src.includes('tzegilo.com')) {
+          $(el).remove();
+        }
+      }
+    });
+
     // Add a base tag to resolve relative paths
     const origin = new URL(cleanUrl).origin;
     $('head').prepend(`<base href="${origin}">`);
