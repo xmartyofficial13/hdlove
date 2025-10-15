@@ -26,7 +26,7 @@ async function fetchHtml(url: string) {
   }
 }
 
-function parseMovies(html: string): Movie[] {
+function parseMovies(html: string, isHomepage: boolean = false): Movie[] {
   const $ = cheerio.load(html);
   const movies: Movie[] = [];
   const seenPaths = new Set<string>();
@@ -58,12 +58,17 @@ function parseMovies(html: string): Movie[] {
     }
   };
 
-  $('ul.recent-movies li.thumb').each(processElement);
+  // Homepage uses a specific layout
+  if (isHomepage) {
+    $('ul.recent-movies li.thumb').each(processElement);
+  }
   
+  // Category and Search pages use this layout
   if (movies.length === 0) {
     $('article.TPost.B').each(processElement);
   }
   
+  // Fallback for search results
   if (movies.length === 0) {
     $('.result-item .details .title a').each((_, element) => {
         const a = $(element);
@@ -85,7 +90,7 @@ export async function getHomepageMovies(page: number = 1): Promise<Movie[]> {
   const url = page > 1 ? `${BASE_URL}/page/${page}` : BASE_URL;
   const html = await fetchHtml(url);
   if (!html) return [];
-  const movies = parseMovies(html);
+  const movies = parseMovies(html, true); // Pass true for homepage
   return movies.map(movie => ({
       ...movie,
       description: movie.title, 
