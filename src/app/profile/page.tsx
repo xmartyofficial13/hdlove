@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Edit2 } from 'lucide-react';
 
+export const dynamic = "force-dynamic";
+
 export default function ProfilePage() {
   const [name, setName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
