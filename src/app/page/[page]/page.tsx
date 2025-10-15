@@ -4,31 +4,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import { getHomepageMovies } from '@/lib/actions';
 
 export const revalidate = 3600; // Revalidate every hour
-
-async function getHomepageMoviesFromApi(page: number = 1): Promise<Movie[]> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-    try {
-        const res = await fetch(`${baseUrl}/api/scrape?page=${page}`, { 
-            cache: 'no-store', // Disable caching for this fetch
-            headers: {
-                'Accept': 'application/json',
-            }
-        });
-        if (!res.ok) {
-            console.error(`Failed to fetch movies from API for page ${page}`, res.status, res.statusText);
-            const errorBody = await res.text();
-            console.error("Error body:", errorBody);
-            return [];
-        }
-        const data = await res.json();
-        return data.movies;
-    } catch(e) {
-        console.error(`Error fetching from /api/scrape?page=${page}:`, e);
-        return [];
-    }
-}
 
 interface PageProps {
   params: {
@@ -43,7 +21,7 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  const movies = await getHomepageMoviesFromApi(page);
+  const movies = await getHomepageMovies(page);
 
   const currentPage = page;
   const prevPage = currentPage - 1;

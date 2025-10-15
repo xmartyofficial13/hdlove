@@ -18,28 +18,10 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import type { MovieDetails } from '@/lib/types';
+import { getMovieDetails } from '@/lib/actions';
 
 
 export const revalidate = 86400; // Revalidate once a day
-
-async function getMovieDetailsFromApi(path: string): Promise<MovieDetails | null> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-    try {
-        const res = await fetch(`${baseUrl}/api/movie/${path}`, {
-            next: { revalidate: 3600 },
-        });
-        if (!res.ok) {
-            console.error("Failed to fetch movie details from API", res.status, res.statusText);
-            return null;
-        }
-        const data = await res.json();
-        return data.movie;
-    } catch(e) {
-        console.error(`Error fetching from /api/movie/${path}:`, e);
-        return null;
-    }
-}
-
 
 interface MoviePageProps {
   params: {
@@ -49,7 +31,7 @@ interface MoviePageProps {
 
 export async function generateMetadata({ params }: MoviePageProps) {
     const path = params.slug.join('/');
-    const details = await getMovieDetailsFromApi(path);
+    const details = await getMovieDetails(path);
   
     if (!details) {
       return {
@@ -58,7 +40,7 @@ export async function generateMetadata({ params }: MoviePageProps) {
     }
   
     return {
-      title: `${details.title} - NetVlyx`,
+      title: `${details.title} - Hdhub4u`,
       description: details.description,
     }
 }
@@ -80,7 +62,7 @@ const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: stri
 
 export default async function MoviePage({ params }: MoviePageProps) {
   const path = params.slug.join('/');
-  const details = await getMovieDetailsFromApi(path);
+  const details = await getMovieDetails(path);
 
   if (!details) {
     notFound();
@@ -240,5 +222,3 @@ export default async function MoviePage({ params }: MoviePageProps) {
     </div>
   );
 }
-
-    

@@ -3,35 +3,12 @@ import type { Movie } from '@/lib/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { getHomepageMovies } from '@/lib/actions';
 
 export const revalidate = 3600; // Revalidate every hour
 
-async function getHomepageMoviesFromApi(page: number = 1): Promise<Movie[]> {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-    try {
-        const res = await fetch(`${baseUrl}/api/scrape?page=${page}`, { 
-            next: { revalidate: 3600 },
-            headers: {
-                'Accept': 'application/json',
-            }
-        });
-        if (!res.ok) {
-            console.error("Failed to fetch movies from API", res.status, res.statusText);
-            const errorBody = await res.text();
-            console.error("Error body:", errorBody);
-            return [];
-        }
-        const data = await res.json();
-        return data.movies;
-    } catch(e) {
-        console.error("Error fetching from /api/scrape:", e);
-        return [];
-    }
-}
-
-
 export default async function Home() {
-  const movies = await getHomepageMoviesFromApi(1);
+  const movies = await getHomepageMovies(1);
 
   return (
     <div className="container mx-auto px-4 py-8">
