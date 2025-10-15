@@ -104,9 +104,9 @@ export async function getSearchResults(query: string): Promise<Movie[]> {
 }
 
 export async function getCategoryMovies(path: string, page: number = 1): Promise<Movie[]> {
-    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    const cleanPath = path.replace(/^\/category\//, '').replace(/^\//, '');
     const pagePath = page > 1 ? `/page/${page}` : '';
-    const url = `${BASE_URL}/${cleanPath}${pagePath}`;
+    const url = `${BASE_URL}/category/${cleanPath}${pagePath}`;
     console.log(`Scraping category page: ${url}`);
     const html = await fetchHtml(url);
     if (!html) return [];
