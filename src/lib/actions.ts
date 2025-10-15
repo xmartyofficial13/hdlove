@@ -336,11 +336,9 @@ export async function getCategories(): Promise<Category[]> {
         const mainLink = $(element).children('a');
         const name = mainLink.text().trim();
         let path = mainLink.attr('href')?.replace(BASE_URL, '') || '';
-        if (path.startsWith('/')) {
-            path = path.substring(1);
-        }
+        
         if(name && path && !['Home', 'More'].includes(name) && !seen.has(name) && path !== '/') {
-            categories.push({ name, path: `/${path}` });
+            categories.push({ name, path: path.startsWith('/') ? path : `/${path}` });
             seen.add(name);
         }
 
@@ -349,11 +347,9 @@ export async function getCategories(): Promise<Category[]> {
              const subLink = $(subElement).children('a');
              const subName = subLink.text().trim();
              let subPath = subLink.attr('href')?.replace(BASE_URL, '') || '';
-             if (subPath.startsWith('/')) {
-                subPath = subPath.substring(1);
-             }
+             
              if(subName && subPath && !seen.has(subName) && subPath !== '/') {
-                categories.push({ name: subName, path: `/${subPath}` });
+                categories.push({ name: subName, path: subPath.startsWith('/') ? subPath : `/${subPath}` });
                 seen.add(subName);
              }
         });
@@ -381,4 +377,3 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
-

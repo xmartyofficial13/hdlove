@@ -29,7 +29,7 @@ export async function generateMetadata({ params, searchParams }: CategoryPagePro
   };
 }
 
-export default function CategoryPage({ params, searchParams }: CategoryPageProps) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const slug = params.slug || [];
   const path = slug.join('/');
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
