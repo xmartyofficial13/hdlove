@@ -20,7 +20,7 @@ import {
 import type { MovieDetails } from '@/lib/types';
 import { getMovieDetails } from '@/lib/actions';
 
-
+export const dynamic = 'force-dynamic';
 export const revalidate = 86400; // Revalidate once a day
 
 interface MoviePageProps {

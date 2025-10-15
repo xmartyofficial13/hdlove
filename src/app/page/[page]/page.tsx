@@ -1,11 +1,11 @@
 import { MovieCard } from '@/components/MovieCard';
-import type { Movie } from '@/lib/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getHomepageMovies } from '@/lib/actions';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate every hour
 
 interface PageProps {

@@ -2,6 +2,7 @@ import { getSearchResults } from '@/lib/actions';
 import { MovieCard } from '@/components/MovieCard';
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate every hour
 
 interface SearchPageProps {
