@@ -38,7 +38,8 @@ function parseMovies(html: string): Movie[] {
      if (path.startsWith('http')) {
         try {
             const url = new URL(path);
-            if (url.hostname === new URL(BASE_URL).hostname) {
+            const baseHostname = new URL(BASE_URL).hostname;
+            if (url.hostname.endsWith(baseHostname)) {
                 path = url.pathname;
             } else {
                 return; // Skip external links
@@ -71,7 +72,20 @@ function parseMovies(html: string): Movie[] {
   if (movies.length === 0) {
     $('.result-item .details .title a').each((_, element) => {
         const a = $(element);
-        const path = a.attr('href')?.replace(BASE_URL, '') || '';
+        let path = a.attr('href')?.replace(BASE_URL, '') || '';
+         if (path.startsWith('http')) {
+            try {
+                const url = new URL(path);
+                const baseHostname = new URL(BASE_URL).hostname;
+                 if (url.hostname.endsWith(baseHostname)) {
+                    path = url.pathname;
+                } else {
+                    return;
+                }
+            } catch (e) {
+                return;
+            }
+        }
         const title = a.text().trim();
         const imageUrl = $(element).closest('.result-item').find('img').attr('src') || '';
 
@@ -336,21 +350,21 @@ export async function getCategories(): Promise<Category[]> {
       { name: "Documentary", path: "/category/documentary/" },
       { name: "Drama", path: "/category/drama/" },
       { name: "Dual Audio", path: "/category/dual-audio/" },
-      { name: "Family", path: "/category/family/" },
-      { name: "Fantasy", path: "/category/fantasy/" },
-      { name: "HD Movies", path: "/category/hd-movies/" },
-      { name: "Hindi Dubbed", path: "/category/hindi-dubbed/" },
-      { name: "Hollywood", path: "/category/hollywood-movies/" },
-      { name: "Horror", path: "/category/horror-movies/" },
-      { name: "Movie Series", path: "/category/movie-series-collection/" },
-      { name: "Mystery", path: "/category/mystery/" },
-      { name: "Romance", path: "/category/romantic-movies/" },
-      { name: "Sci-Fi", path: "/category/sci-fi/" },
-      { name: "Thriller", path: "/category/thriller/" },
-      { name: "TV Shows", path: "/category/tv-shows/" },
-      { name: "War", path: "/category/war/" },
-      { name: "Web Series", path: "/category/web-series/" },
-    ];
+      { name: "Family", path_group: "family" },
+      { name: "Fantasy", path_group: "fantasy" },
+      { name: "HD Movies", path_group: "hd-movies" },
+      { name: "Hindi Dubbed", path_group: "hindi-dubbed" },
+      { name: "Hollywood", path_group: "hollywood-movies" },
+      { name: "Horror", path_group: "horror-movies" },
+      { name: "Movie Series", path_group: "movie-series-collection" },
+      { name: "Mystery", path_group: "mystery" },
+      { name: "Romance", path_group: "romantic-movies" },
+      { name: "Sci-Fi", path_group: "sci-fi" },
+      { name: "Thriller", path_group: "thriller" },
+      { name: "TV Shows", path_group: "tv-shows" },
+      { name: "War", path_group: "war" },
+      { name: "Web Series", path_group: "web-series" },
+    ].map(c => ({...c, path: c.path || `/category/${c.path_group}/`}));
     return Promise.resolve(categories);
 }
     
@@ -358,6 +372,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
