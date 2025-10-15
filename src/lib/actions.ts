@@ -340,7 +340,7 @@ export async function getCategories(): Promise<Category[]> {
             path = path.substring(1);
         }
         if(name && path && !['Home', 'More'].includes(name) && !seen.has(name) && path !== '/') {
-            categories.push({ name, path: `/category/${path}` });
+            categories.push({ name, path: `/${path}` });
             seen.add(name);
         }
 
@@ -353,7 +353,7 @@ export async function getCategories(): Promise<Category[]> {
                 subPath = subPath.substring(1);
              }
              if(subName && subPath && !seen.has(subName) && subPath !== '/') {
-                categories.push({ name: subName, path: `/category/${subPath}` });
+                categories.push({ name: subName, path: `/${subPath}` });
                 seen.add(subName);
              }
         });
@@ -381,3 +381,4 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
