@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { ChevronDown, Menu, Search } from 'lucide-react';
+import { ChevronDown, Menu } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -71,7 +71,7 @@ export async function Header() {
             <Link
               key={category.path}
               href={category.path}
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="whitespace-nowrap transition-colors hover:text-foreground/80 text-foreground/60"
               prefetch={false}
             >
               {category.name}
