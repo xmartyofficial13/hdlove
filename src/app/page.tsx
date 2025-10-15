@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { getHomepageMovies, getCategories } from '@/lib/actions';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 export const revalidate = 3600; // Revalidate every hour
@@ -15,25 +14,22 @@ async function CategoryBrowser() {
       <h2 className="mb-4 font-headline text-xl font-bold tracking-tight text-foreground sm:text-2xl">
         Browse All Categories
       </h2>
-      <ScrollArea className="w-full whitespace-nowrap rounded-lg">
-          <div className="flex w-max space-x-4 pb-4">
-              {categories.map((category) => (
-                  <Link href={category.path} key={category.path} passHref>
-                      <Button
-                          className={cn(
-                              'h-auto p-0 text-white uppercase font-bold text-[17px] animate-bump transition-all duration-500',
-                              'bg-gradient-to-r from-red-600 to-black',
-                              'shadow-[0_6px_15px_-2px_rgba(255,0,0,0.5)]',
-                              'hover:saturate-200 hover:-translate-y-1'
-                          )}
-                          >
-                          <div className="px-8 py-3">{category.name}</div>
-                      </Button>
-                  </Link>
-              ))}
-          </div>
-          <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      <div className="flex flex-wrap gap-4">
+          {categories.map((category) => (
+              <Link href={category.path} key={category.path} passHref>
+                  <Button
+                      className={cn(
+                          'h-auto p-0 text-white uppercase font-bold text-[17px] animate-bump transition-all duration-500',
+                          'bg-gradient-to-r from-red-600 to-black',
+                          'shadow-[0_6px_15px_-2px_rgba(255,0,0,0.5)]',
+                          'hover:saturate-200 hover:-translate-y-1'
+                      )}
+                      >
+                      <div className="px-8 py-3">{category.name}</div>
+                  </Button>
+              </Link>
+          ))}
+      </div>
     </div>
   )
 }
