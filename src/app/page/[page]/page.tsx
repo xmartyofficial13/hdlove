@@ -5,7 +5,6 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getHomepageMovies } from '@/lib/actions';
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate every hour
 
 interface PageProps {

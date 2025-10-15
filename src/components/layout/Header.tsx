@@ -3,6 +3,7 @@ import { getCategories } from '@/lib/actions';
 import { Logo } from './Logo';
 import { SearchBar } from './SearchBar';
 import { ThemeToggle } from './ThemeToggle';
+import { Suspense } from 'react';
 
 
 export async function Header() {
@@ -22,6 +23,7 @@ export async function Header() {
                         key={category.path}
                         href={`/category${category.path}`}
                         className="transition-colors hover:text-foreground/80 text-foreground/60"
+                        prefetch={false}
                     >
                         {category.name}
                     </Link>
@@ -31,7 +33,9 @@ export async function Header() {
 
         <div className="flex flex-1 items-center justify-end gap-2">
           <div className="w-full flex-1 md:w-auto md:flex-none">
+            <Suspense fallback={<div className="h-10 w-full rounded-full bg-muted md:w-64"></div>}>
              <SearchBar />
+            </Suspense>
           </div>
           <ThemeToggle />
         </div>
