@@ -21,35 +21,6 @@ export async function Header() {
         <div className="mr-4 hidden md:flex">
             <Logo />
         </div>
-
-        {/* Mobile Menu */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="pr-0">
-             <Link href="/" className="flex items-center space-x-2 px-6">
-                <Clapperboard className="h-6 w-6 text-primary" />
-                <span className="font-bold font-headline">Hdhub4u</span>
-            </Link>
-            <div className="my-4 h-[calc(100vh-8rem)] overflow-y-auto pb-10 pl-6">
-              <div className="flex flex-col space-y-3">
-                {categories.map((category) => (
-                  <Link
-                    key={category.path}
-                    href={`/category${category.path}`}
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {category.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
         
         <div className="hidden md:flex flex-1 items-center space-x-6 text-sm font-medium">
             <nav className="flex items-center gap-6 text-sm">
@@ -65,7 +36,7 @@ export async function Header() {
             </nav>
         </div>
 
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex flex-1 items-center justify-between gap-2 md:justify-end">
           <div className="w-full flex-1 md:w-auto md:flex-none">
              <SearchBar />
           </div>
