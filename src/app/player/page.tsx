@@ -105,9 +105,9 @@ function Player() {
       </div>
        <Alert variant="default" className="mt-4 bg-muted/50">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>How this works</AlertTitle>
+            <AlertTitle>How to Play</AlertTitle>
             <AlertDescription>
-                We&apos;re loading the content in a secure player that blocks ads and pop-ups. If the video doesn&apos;t load, try turning off the &quot;Ad-Block (Sandbox)&quot; toggle.
+                Please click the play button 4-5 times to start the video, as it may not play on the first click. Once the video starts, use the full-screen button for the best viewing experience.
             </AlertDescription>
           </Alert>
     </div>
