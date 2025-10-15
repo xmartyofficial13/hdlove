@@ -17,19 +17,21 @@ interface CategoryPageProps {
 }
 
 // Function to generate metadata
-export async function generateMetadata({ params }: CategoryPageProps) {
-  const path = params.slug.join('/');
+export async function generateMetadata({ params }: { params: { slug: string[] } }) {
+  const slug = params.slug || [];
+  const path = slug.join('/');
   // Capitalize each part of the slug for the title
-  const title = params.slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
+  const title = slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
   return {
     title: `${title} - NetVlyx`,
   };
 }
 
 export default function CategoryPage({ params, searchParams }: CategoryPageProps) {
-  const path = params.slug.join('/');
+  const slug = params.slug || [];
+  const path = slug.join('/');
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
-  const title = params.slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
+  const title = slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
 
   return (
     <div className="container mx-auto px-4 py-8">
