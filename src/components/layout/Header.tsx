@@ -8,7 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from '../ui/button';
-import { Menu, Clapperboard, User } from 'lucide-react';
+import { Menu, Clapperboard } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
 
@@ -70,12 +70,6 @@ export async function Header() {
              <SearchBar />
           </div>
           <ThemeToggle />
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/profile">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Profile</span>
-            </Link>
-          </Button>
         </div>
       </div>
     </header>
