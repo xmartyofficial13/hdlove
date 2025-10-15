@@ -1,8 +1,9 @@
 
 import * as cheerio from 'cheerio';
 import type { Movie, MovieDetails, DownloadLink, Category, Episode } from './types';
+import config from './config.json';
 
-const BASE_URL = 'https://hdhub4u.cologne';
+const BASE_URL = config.baseUrl;
 
 async function fetchHtml(url: string) {
   try {
@@ -356,6 +357,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
