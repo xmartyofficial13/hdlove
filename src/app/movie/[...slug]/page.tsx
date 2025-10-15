@@ -107,7 +107,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
           </div>
         </div>
         <div className="md:col-span-8 lg:col-span-9">
-          <h1 className="font-headline text-4xl font-bold tracking-tight text-white lg:text-5xl">
+          <h1 className="font-headline text-xl font-bold tracking-tight text-white lg:text-2xl">
             {details.title}
           </h1>
 
