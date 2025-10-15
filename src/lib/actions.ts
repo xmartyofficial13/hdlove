@@ -114,7 +114,7 @@ export async function getCategoryMovies(path: string, page: number = 1): Promise
 
 
 export async function getMovieDetails(path: string): Promise<MovieDetails | null> {
-  const url = `${BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const url = `${BASE_URL}${path}`;
   const html = await fetchHtml(url);
   if (!html) return null;
 
@@ -356,5 +356,6 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
