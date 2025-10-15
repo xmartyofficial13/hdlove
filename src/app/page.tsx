@@ -2,16 +2,49 @@ import { MovieCard } from '@/components/MovieCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import { getHomepageMovies } from '@/lib/actions';
+import { getHomepageMovies, getCategories } from '@/lib/actions';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 export const revalidate = 3600; // Revalidate every hour
+
+async function CategoryBrowser() {
+  const categories = await getCategories();
+  return (
+    <div className="mb-12">
+      <h2 className="mb-4 font-headline text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+        Browse All Categories
+      </h2>
+      <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+          <div className="flex w-max space-x-4 pb-4">
+              {categories.map((category) => (
+                  <Link href={category.path} key={category.path} passHref>
+                      <Button
+                          variant="default"
+                          className={cn(
+                              'h-auto transform text-white transition-transform duration-300 ease-in-out hover:scale-105',
+                              'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600'
+                          )}
+                          >
+                          <div className="p-3 text-sm font-semibold">{category.name}</div>
+                      </Button>
+                  </Link>
+              ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </div>
+  )
+}
 
 export default async function Home() {
   const movies = await getHomepageMovies(1);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      <CategoryBrowser />
+
+      <h1 className="mb-8 font-headline text-xl font-bold tracking-tight text-foreground sm:text-4xl">
         Trending & Recent
       </h1>
       {movies && movies.length > 0 ? (

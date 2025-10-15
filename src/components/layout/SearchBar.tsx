@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Input } from '@/components/ui/input';
@@ -28,7 +29,7 @@ export function SearchBar() {
         name="q"
         defaultValue={defaultQuery}
         placeholder="Search movies and series..."
-        className="w-full rounded-full bg-muted pl-10"
+        className="w-full rounded-full bg-muted pl-10 h-12 text-base"
         aria-label="Search"
       />
     </form>

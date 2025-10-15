@@ -86,7 +86,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           </div>
         </div>
         <div className="w-2/3 md:w-3/4">
-          <h1 className="font-headline text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="font-headline font-bold tracking-tight text-foreground sm:text-3xl">
             {details.title}
           </h1>
 

@@ -107,7 +107,6 @@ export async function getCategoryMovies(path: string, page: number = 1): Promise
     const cleanPath = path.replace(/^\/category\//, '').replace(/^\//, '');
     const pagePath = page > 1 ? `/page/${page}` : '';
     const url = `${BASE_URL}/category/${cleanPath}${pagePath}`;
-    console.log(`Scraping category page: ${url}`);
     const html = await fetchHtml(url);
     if (!html) return [];
     return parseMovies(html);
@@ -198,8 +197,8 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
   // Get all external links from the page body, including h2, h3, h4, and h5, and p tags.
   const linkSelectors = [
-    '.page-body a', 
-    '.entry-content a',
+    '.page-body p a', 
+    '.entry-content em a',
     '.page-body h2 a', 
     '.page-body h3 a', 
     '.page-body h4 a',
@@ -324,57 +323,51 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 }
 
 export async function getCategories(): Promise<Category[]> {
-    const html = await fetchHtml(BASE_URL);
-    if (!html) return [];
-
-    const $ = cheerio.load(html);
-    const categories: Category[] = [];
-
-    const seen = new Set();
-
-    $('#menu-primary-menu > li.menu-item-has-children').each((_, element) => {
-        const mainLink = $(element).children('a');
-        const name = mainLink.text().trim();
-        let path = mainLink.attr('href')?.replace(BASE_URL, '') || '';
-        
-        if(name && path && !['Home', 'More'].includes(name) && !seen.has(name) && path !== '/') {
-            categories.push({ name, path: path.startsWith('/') ? path : `/${path}` });
-            seen.add(name);
-        }
-
-        // Add sub-menu items
-        $(element).find('ul.sub-menu > li').each((_, subElement) => {
-             const subLink = $(subElement).children('a');
-             const subName = subLink.text().trim();
-             let subPath = subLink.attr('href')?.replace(BASE_URL, '') || '';
-             
-             if(subName && subPath && !seen.has(subName) && subPath !== '/') {
-                categories.push({ name: subName, path: subPath.startsWith('/') ? subPath : `/${subPath}` });
-                seen.add(subName);
-             }
-        });
-    });
-    
-     // Fallback for categories if the main nav fails
-    if(categories.length === 0) {
-        $('.TPost h2.Title a').each((_, element) => {
-            const title = $(element).text().trim();
-            // Basic logic to extract a potential category
-            if(title.includes(')')){
-                const cat = title.substring(title.indexOf('(') + 1, title.indexOf(')'));
-                if(cat.length < 20 && !seen.has(cat)){
-                    categories.push({name: cat, path: `/search/?s=${encodeURIComponent(cat)}`});
-                    seen.add(cat);
-                }
-            }
-        });
-    }
-
-    return categories;
+    const categories: Category[] = [
+      { name: "300MB Movies", path: "/category/300mb-movies/" },
+      { name: "Action", path: "/category/action-movies/" },
+      { name: "Adventure", path: "/category/adventure/" },
+      { name: "Animation", path: "/category/animated-movies/" },
+      { name: "Awards", path: "/category/awards/" },
+      { name: "Biography", path: "/category/biography/" },
+      { name: "Bollywood", path: "/category/bollywood-movies/" },
+      { name: "Comedy", path: "/category/comedy-movies/" },
+      { name: "Crime", path: "/category/crime/" },
+      { name: "Documentary", path: "/category/documentary/" },
+      { name: "Drama", path: "/category/drama/" },
+      { name: "Dual Audio", path: "/category/dual-audio/" },
+      { name: "Family", path: "/category/family/" },
+      { name: "Fantasy", path: "/category/fantasy/" },
+      { name: "Gujarati", path: "/category/gujarati/" },
+      { name: "HD Movies", path: "/category/hd-movies/" },
+      { name: "Hindi Dubbed", path: "/category/hindi-dubbed/" },
+      { name: "History", path: "/category/history/" },
+      { name: "Hollywood", path: "/category/hollywood-movies/" },
+      { name: "Horror", path: "/category/horror-movies/" },
+      { name: "Hindi Unofficial Dubs", path: "/category/unofficial-south-hindi-dubs/" },
+      { name: "Movie Series", path: "/category/movie-series-collection/" },
+      { name: "Music", path: "/category/music/" },
+      { name: "Mystery", path: "/category/mystery/" },
+      { name: "Punjabi", path: "/category/punjabi/" },
+      { name: "Romance", path: "/category/romantic-movies/" },
+      { name: "Sci-Fi", path: "/category/sci-fi/" },
+      { name: "South Hindi Movies", path: "/category/south-hindi-movies/" },
+      { name: "South Hindi Voiceover", path: "/category/south-hindi-dub-voiceover/" },
+      { name: "Talk Shows", path: "/category/talk/" },
+      { name: "Thriller", path: "/category/thriller/" },
+      { name: "Trailers", path: "/category/trailers/" },
+      { name: "True WEB-DL", path: "/category/true-web-dl/" },
+      { name: "TV Shows", path: "/category/tv-shows/" },
+      { name: "War", path: "/category/war/" },
+      { name: "Web Series", path: "/category/web-series/" },
+      { name: "Wrestling", path: "/category/wrestling-shows/" }
+    ];
+    return Promise.resolve(categories);
 }
     
 
     
 
     
+
 

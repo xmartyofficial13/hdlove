@@ -1,42 +1,107 @@
 import Link from 'next/link';
 import { getCategories } from '@/lib/actions';
 import { Logo } from './Logo';
-import { SearchBar } from './SearchBar';
 import { ThemeToggle } from './ThemeToggle';
 import { Suspense } from 'react';
-
+import { Button } from '../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { ChevronDown, Menu, Search } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { ScrollArea } from '../ui/scroll-area';
+import { SearchModal } from './SearchModal';
 
 export async function Header() {
   const categories = await getCategories();
+  const mainCategories = categories.slice(0, 5);
+  const moreCategories = categories.slice(5);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 max-w-screen-2xl items-center px-4">
-        <div className="mr-4 flex">
-            <Logo />
+      <div className="container flex h-16 max-w-screen-2xl items-center px-4">
+        <div className="mr-4 hidden flex-1 md:flex">
+          <Logo />
         </div>
         
-        <div className="hidden md:flex flex-1 items-center space-x-6 text-sm font-medium">
-            <nav className="flex items-center gap-6 text-sm">
-                {categories.slice(0, 5).map((category) => (
+        {/* Mobile Header */}
+        <div className="flex flex-1 items-center md:hidden">
+           <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Open Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="pr-0">
+                <div className="flex items-center mb-6 pl-6">
+                    <Logo />
+                </div>
+              <ScrollArea className="h-[calc(100vh-8rem)]">
+                <div className="flex flex-col space-y-2 pl-6">
+                  {categories.map((category) => (
                     <Link
                         key={category.path}
-                        href={category.path.startsWith('/') ? category.path : `/${category.path}`}
-                        className="transition-colors hover:text-foreground/80 text-foreground/60"
+                        href={category.path}
+                        className="text-lg font-medium text-foreground/80 transition-colors hover:text-foreground"
                         prefetch={false}
                     >
                         {category.name}
                     </Link>
-                ))}
-            </nav>
+                  ))}
+                </div>
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+          <div className="flex flex-1 justify-center">
+            <Logo />
+          </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-end gap-2">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <Suspense fallback={<div className="h-10 w-full rounded-full bg-muted md:w-64"></div>}>
-             <SearchBar />
-            </Suspense>
-          </div>
+        {/* Desktop Header */}
+        <nav className="hidden md:flex flex-1 items-center space-x-6 text-sm font-medium">
+          {mainCategories.map((category) => (
+            <Link
+              key={category.path}
+              href={category.path}
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              prefetch={false}
+            >
+              {category.name}
+            </Link>
+          ))}
+          {moreCategories.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-foreground/60 focus:bg-accent">
+                  More
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {moreCategories.map((category) => (
+                  <DropdownMenuItem key={category.path} asChild>
+                    <Link href={category.path} prefetch={false}>
+                      {category.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </nav>
+
+        <div className="flex flex-shrink-0 items-center justify-end gap-2">
+          <Suspense fallback={<div className="h-10 w-10"></div>}>
+             <SearchModal />
+          </Suspense>
           <ThemeToggle />
         </div>
       </div>

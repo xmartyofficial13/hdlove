@@ -28,7 +28,7 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      <h1 className="mb-8 font-headline text-xl font-bold tracking-tight text-foreground sm:text-4xl">
         Page {currentPage}
       </h1>
       {movies && movies.length > 0 ? (
