@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { notFound } from 'next/navigation';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -11,29 +12,41 @@ interface CategoryPageProps {
   params: {
     slug: string[];
   };
-  searchParams: {
-    page?: string;
-  };
 }
 
 // Function to generate metadata
-export async function generateMetadata({ params, searchParams }: CategoryPageProps) {
+export async function generateMetadata({ params }: CategoryPageProps) {
   const slug = params.slug || [];
-  const path = slug.join('/');
+  const pageIndex = slug.indexOf('page');
+  const categoryParts = pageIndex !== -1 ? slug.slice(0, pageIndex) : slug;
+  const path = categoryParts.join('/');
+  const page = pageIndex !== -1 && slug[pageIndex + 1] ? parseInt(slug[pageIndex + 1], 10) : 1;
+
   // Capitalize each part of the slug for the title
-  const title = slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
-  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
+  const title = categoryParts.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
+  
+  if (!title) {
+      return { title: 'Category Not Found' };
+  }
 
   return {
     title: `${title}${page > 1 ? ` - Page ${page}` : ''} - NetVlyx`,
   };
 }
 
-export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
+export default async function CategoryPage({ params }: CategoryPageProps) {
   const slug = params.slug || [];
-  const path = slug.join('/');
-  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
-  const title = slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
+
+  const pageIndex = slug.indexOf('page');
+  const categoryParts = pageIndex !== -1 ? slug.slice(0, pageIndex) : slug;
+  const path = categoryParts.join('/');
+  const page = pageIndex !== -1 && slug[pageIndex + 1] ? parseInt(slug[pageIndex + 1], 10) : 1;
+
+  if (isNaN(page)) {
+    notFound();
+  }
+
+  const title = categoryParts.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -55,7 +68,7 @@ async function CategoryResults({ path, page }: { path: string, page: number }) {
   const movies = await getCategoryMovies(path, page);
 
   const prevPage = page > 1 ? page - 1 : null;
-  const nextPage = movies.length > 0 ? page + 1 : null;
+  const nextPage = movies.length > 0 ? page + 1 : null; // Assume there's a next page if current page has movies
 
   if (movies.length === 0) {
     return (
@@ -63,7 +76,7 @@ async function CategoryResults({ path, page }: { path: string, page: number }) {
         <p className="text-center text-muted-foreground">No content found for this category or you've reached the end.</p>
         {prevPage && (
              <Button asChild variant="outline">
-                <Link href={`/category/${path}?page=${prevPage}`}>
+                <Link href={`/category/${path}${prevPage > 1 ? `/page/${prevPage}` : ''}`}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Previous
                 </Link>
@@ -83,7 +96,7 @@ async function CategoryResults({ path, page }: { path: string, page: number }) {
       <div className="mt-12 flex justify-center gap-4">
         {prevPage && (
              <Button asChild variant="outline">
-                <Link href={`/category/${path}?page=${prevPage}`}>
+                <Link href={`/category/${path}${prevPage > 1 ? `/page/${prevPage}` : ''}`}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Previous
                 </Link>
@@ -91,7 +104,7 @@ async function CategoryResults({ path, page }: { path: string, page: number }) {
         )}
          {nextPage && (
             <Button asChild variant="outline">
-                <Link href={`/category/${path}?page=${nextPage}`}>
+                <Link href={`/category/${path}/page/${nextPage}`}>
                     Next
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
