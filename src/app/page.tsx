@@ -20,13 +20,14 @@ async function CategoryBrowser() {
               {categories.map((category) => (
                   <Link href={category.path} key={category.path} passHref>
                       <Button
-                          variant="default"
                           className={cn(
-                              'h-auto transform text-white transition-transform duration-300 ease-in-out hover:scale-105',
-                              'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600'
+                              'h-auto p-0 text-white uppercase font-bold text-[17px] animate-bump transition-all duration-500',
+                              'bg-gradient-to-r from-red-600 to-black',
+                              'shadow-[0_6px_15px_-2px_rgba(255,0,0,0.5)]',
+                              'hover:saturate-200 hover:-translate-y-1'
                           )}
                           >
-                          <div className="p-3 text-sm font-semibold">{category.name}</div>
+                          <div className="px-8 py-3">{category.name}</div>
                       </Button>
                   </Link>
               ))}
