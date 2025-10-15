@@ -16,7 +16,7 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 font-headline text-3xl font-bold tracking-tight text-white sm:text-4xl">
+      <h1 className="mb-8 font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         {query ? `Results for "${query}"` : 'Search'}
       </h1>
       <Suspense fallback={<SearchResultsSkeleton />}>

@@ -54,7 +54,7 @@ const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: stri
       </div>
       <div>
         <p className="text-sm font-semibold text-muted-foreground">{label}</p>
-        <div className="text-base font-medium text-white">{value}</div>
+        <div className="text-base font-medium text-foreground">{value}</div>
       </div>
     </div>
   );
@@ -89,7 +89,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
           </div>
         </div>
         <div className="md:col-span-8 lg:col-span-9">
-          <h1 className="font-headline text-xl font-bold tracking-tight text-white">
+          <h1 className="font-headline text-xl font-bold tracking-tight text-foreground">
             {details.title}
           </h1>
 
@@ -123,7 +123,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
           {hubdriveLinks.length > 0 && (
              <div className="mb-8">
-                <h2 className="font-headline text-2xl font-semibold text-white">
+                <h2 className="font-headline text-2xl font-semibold text-foreground">
                   HubDrive Download Links
                 </h2>
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -136,7 +136,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
           {details.screenshots && details.screenshots.length > 0 && (
             <div className="mt-12">
-                <h2 className="font-headline text-2xl font-semibold text-white">Screenshots</h2>
+                <h2 className="font-headline text-2xl font-semibold text-foreground">Screenshots</h2>
                 <Carousel
                     opts={{
                     align: "start",
@@ -166,7 +166,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
           
            {hasEpisodes ? (
             <div className="mt-8">
-              <h2 className="font-headline text-2xl font-semibold text-white">
+              <h2 className="font-headline text-2xl font-semibold text-foreground">
                 Episodes
               </h2>
               <Accordion type="single" collapsible className="mt-4 w-full">
@@ -193,7 +193,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
             </div>
            ) : otherDownloadLinks.length > 0 ? (
              <div className="mt-8">
-                <h2 className="font-headline text-2xl font-semibold text-white">
+                <h2 className="font-headline text-2xl font-semibold text-foreground">
                   Download Links
                 </h2>
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
