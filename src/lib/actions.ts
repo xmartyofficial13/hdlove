@@ -350,44 +350,6 @@ export async function getCategories(): Promise<Category[]> {
 
     return categories;
 }
-
-export async function getStreamDetails(streamPath: string): Promise<{ file: string; downloadUrl: string; title: string; } | null> {
-    const url = `https://hdstream4u.com/${streamPath}`;
-    const html = await fetchHtml(url);
-    if (!html) return null;
-  
-    const $ = cheerio.load(html);
-  
-    const title = $('title').text().trim();
-    const downloadUrl = $('a.btn.btn-gradient.submit-btn').attr('href');
     
-    // Find the script containing the jwplayer setup
-    let playerScript = '';
-    $('script').each((_, script) => {
-      const scriptContent = $(script).html();
-      if (scriptContent && scriptContent.includes('jwplayer("player").setup')) {
-        playerScript = scriptContent;
-        return false; // Exit each loop
-      }
-    });
-  
-    if (!playerScript) {
-      return null;
-    }
-  
-    // Extract the file URL from the jwplayer setup script
-    const fileMatch = playerScript.match(/file:\s*"([^"]+)"/);
-    const file = fileMatch ? fileMatch[1] : null;
-  
-    if (!file || !downloadUrl) {
-      return null;
-    }
-  
-    return {
-      file,
-      downloadUrl: `https://hdstream4u.com${downloadUrl}`,
-      title,
-    };
-  }
 
     

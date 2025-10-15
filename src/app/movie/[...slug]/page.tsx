@@ -1,3 +1,4 @@
+
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
 import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
@@ -69,8 +70,6 @@ export default async function MoviePage({ params }: MoviePageProps) {
   
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
   const hasDownloads = details.downloadLinks && details.downloadLinks.length > 0;
-  const hubdriveLinks = details.downloadLinks?.filter(link => link.url.includes('hubdrive.space') || link.url.includes('hdstream')) || [];
-  const otherDownloadLinks = details.downloadLinks?.filter(link => !link.url.includes('hubdrive.space') && !link.url.includes('hdstream')) || [];
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -131,19 +130,6 @@ export default async function MoviePage({ params }: MoviePageProps) {
       <div className="w-full">
           <Separator className="my-8" />
 
-          {hubdriveLinks.length > 0 && (
-             <div className="mb-8">
-                <h2 className="font-headline text-2xl font-semibold text-foreground">
-                  Watch Online / Direct Download
-                </h2>
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                    {hubdriveLinks.map((link) => (
-                    <DownloadButton key={link.url} link={link} />
-                    ))}
-                </div>
-             </div>
-          )}
-
           {details.screenshots && details.screenshots.length > 0 && (
             <div className="mt-12">
                 <h2 className="font-headline text-2xl font-semibold text-foreground">Screenshots</h2>
@@ -201,33 +187,33 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 ))}
               </Accordion>
             </div>
-           ) : otherDownloadLinks.length > 0 ? (
+           ) : hasDownloads ? (
              <div className="mt-8">
                 <h2 className="font-headline text-2xl font-semibold text-foreground">
                   Download Links
                 </h2>
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                    {otherDownloadLinks.map((link) => (
+                    {details.downloadLinks.map((link) => (
                     <DownloadButton key={link.url} link={link} />
                     ))}
                 </div>
              </div>
            ) : (
-            !hasDownloads && !hasEpisodes && hubdriveLinks.length === 0 && (
              <div className="mt-4 flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted">
                  <p className="text-muted-foreground">No download links found.</p>
              </div>
-            )
            )}
           
           <Alert variant="default" className="mt-8 bg-muted/50">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Please Note</AlertTitle>
             <AlertDescription>
-                For download links, you may be redirected to a page with timers or ads. This is part of the source website's system. Wait for the final download to appear. Watch links will open in a sandboxed player to block ads.
+                For download links, you may be redirected to a page with timers or ads. This is part of the source website's system. Wait for the final download to appear.
             </AlertDescription>
           </Alert>
         </div>
     </div>
   );
 }
+
+    
