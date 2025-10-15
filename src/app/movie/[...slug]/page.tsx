@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
-import { AlertCircle, Calendar, Clapperboard, Download, Languages, Star, Youtube, Film, User, Video } from 'lucide-react';
+import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: MoviePageProps) {
     }
   
     return {
-      title: `${details.title} - Hdhub4u`,
+      title: `${details.title} - NetVlyx`,
       description: details.description,
     }
 }
@@ -75,8 +75,8 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
-        <div className="md:col-span-4 lg:col-span-3">
+      <div className="flex flex-col gap-8 md:flex-row">
+        <div className="w-full shrink-0 md:w-1/4">
           <div className="sticky top-24">
             <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl shadow-2xl shadow-primary/10">
               <img
@@ -88,8 +88,8 @@ export default async function MoviePage({ params }: MoviePageProps) {
             </div>
           </div>
         </div>
-        <div className="md:col-span-8 lg:col-span-9">
-          <h1 className="font-headline text-xl font-bold tracking-tight text-foreground">
+        <div className="w-full md:w-3/4">
+          <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {details.title}
           </h1>
 
@@ -118,7 +118,10 @@ export default async function MoviePage({ params }: MoviePageProps) {
               Watch Trailer
             </a>
           )}
-
+        </div>
+      </div>
+      
+      <div className="w-full">
           <Separator className="my-8" />
 
           {hubdriveLinks.length > 0 && (
@@ -126,7 +129,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 <h2 className="font-headline text-2xl font-semibold text-foreground">
                   HubDrive Download Links
                 </h2>
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {hubdriveLinks.map((link) => (
                     <DownloadButton key={link.url} link={link} />
                     ))}
@@ -181,7 +184,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-4">
+                      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                         {episode.downloadLinks.map((link, index) => (
                           <DownloadButton key={index} link={link} />
                         ))}
@@ -196,7 +199,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 <h2 className="font-headline text-2xl font-semibold text-foreground">
                   Download Links
                 </h2>
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {otherDownloadLinks.map((link) => (
                     <DownloadButton key={link.url} link={link} />
                     ))}
@@ -218,7 +221,6 @@ export default async function MoviePage({ params }: MoviePageProps) {
             </AlertDescription>
           </Alert>
         </div>
-      </div>
     </div>
   );
 }

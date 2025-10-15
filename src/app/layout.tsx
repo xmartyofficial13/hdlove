@@ -18,7 +18,7 @@ const fontHeadline = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Hdhub4u',
+  title: 'NetVlyx',
   description: 'Your ad-free streaming companion',
 };
 
