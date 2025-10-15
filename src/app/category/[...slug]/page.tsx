@@ -1,12 +1,18 @@
 import { getCategoryMovies } from '@/lib/actions';
 import { MovieCard } from '@/components/MovieCard';
 import { Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export const revalidate = 3600; // Revalidate every hour
 
 interface CategoryPageProps {
   params: {
     slug: string[];
+  };
+  searchParams: {
+    page?: string;
   };
 }
 
@@ -20,43 +26,75 @@ export async function generateMetadata({ params }: CategoryPageProps) {
   };
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
+export default function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const path = params.slug.join('/');
+  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
   const title = params.slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-8 font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-        Category: {title}
+        Category: {title} {page > 1 && ` - Page ${page}`}
       </h1>
       <Suspense fallback={<CategoryResultsSkeleton />}>
-        <CategoryResults path={path} />
+        <CategoryResults path={path} page={page} />
       </Suspense>
     </div>
   );
 }
 
-async function CategoryResults({ path }: { path: string }) {
+async function CategoryResults({ path, page }: { path: string, page: number }) {
   if (!path) {
     return <p className="text-muted-foreground">Category not found.</p>;
   }
 
-  const movies = await getCategoryMovies(path);
+  const movies = await getCategoryMovies(path, page);
+
+  const prevPage = page > 1 ? page - 1 : null;
+  const nextPage = movies.length > 0 ? page + 1 : null;
 
   if (movies.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed border-muted">
-        <p className="text-center text-muted-foreground">No content found for this category.</p>
+      <div className="flex h-64 flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-muted">
+        <p className="text-center text-muted-foreground">No content found for this category or you've reached the end.</p>
+        {prevPage && (
+             <Button asChild variant="outline">
+                <Link href={`/category/${path}?page=${prevPage}`}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Previous
+                </Link>
+            </Button>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-      {movies.map((movie) => (
-        <MovieCard key={movie.path} movie={movie} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+        {movies.map((movie) => (
+          <MovieCard key={movie.path} movie={movie} />
+        ))}
+      </div>
+      <div className="mt-12 flex justify-center gap-4">
+        {prevPage && (
+             <Button asChild variant="outline">
+                <Link href={`/category/${path}?page=${prevPage}`}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Previous
+                </Link>
+            </Button>
+        )}
+         {nextPage && (
+            <Button asChild variant="outline">
+                <Link href={`/category/${path}?page=${nextPage}`}>
+                    Next
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+            </Button>
+        )}
+      </div>
+    </>
   );
 }
 

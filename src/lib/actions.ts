@@ -100,8 +100,10 @@ export async function getSearchResults(query: string): Promise<Movie[]> {
   return parseMovies(html);
 }
 
-export async function getCategoryMovies(path: string): Promise<Movie[]> {
-    const url = `${BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+export async function getCategoryMovies(path: string, page: number = 1): Promise<Movie[]> {
+    const pagePath = page > 1 ? `page/${page}` : '';
+    const fullPath = `${path.startsWith('/') ? '' : '/'}${path}/${pagePath}`;
+    const url = `${BASE_URL}${fullPath}`;
     const html = await fetchHtml(url);
     if (!html) return [];
     return parseMovies(html);
