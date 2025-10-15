@@ -1,13 +1,15 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 function Player() {
   const searchParams = useSearchParams();
@@ -16,12 +18,43 @@ function Player() {
 
   const [useSandbox, setUseSandbox] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [htmlContent, setHtmlContent] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!url) {
+  useEffect(() => {
+    if (!url) {
+      setError('The watch link is missing or invalid.');
+      setIsLoading(false);
+      return;
+    }
+
+    async function fetchCleanHtml() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/scrape?url=${encodeURIComponent(url as string)}`);
+        if (!response.ok) {
+          throw new Error('Failed to load player content.');
+        }
+        const text = await response.text();
+        setHtmlContent(text);
+      } catch (e: any) {
+        console.error(e);
+        setError(e.message || 'An unexpected error occurred.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchCleanHtml();
+  }, [url]);
+
+
+  if (error) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-        <h2 className="text-2xl font-bold text-destructive">Invalid URL</h2>
-        <p className="text-muted-foreground">The watch link is missing or invalid.</p>
+        <h2 className="text-2xl font-bold text-destructive">Error</h2>
+        <p className="text-muted-foreground">{error}</p>
         <Button onClick={() => router.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Go Back
@@ -30,11 +63,6 @@ function Player() {
     );
   }
 
-  const handleToggleSandbox = (checked: boolean) => {
-    setIsLoading(true);
-    setUseSandbox(checked);
-  };
-  
   // By changing the key, we force the iframe to re-render when the sandbox state changes.
   const iframeKey = useSandbox ? 'sandbox-on' : 'sandbox-off';
 
@@ -44,29 +72,30 @@ function Player() {
         {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
                 <Skeleton className="h-full w-full" />
-                <div className="absolute text-white">Loading Player...</div>
+                <div className="absolute text-white">Preparing Secure Player...</div>
             </div>
         )}
-        <iframe
-            key={iframeKey}
-            src={url}
-            className="h-full w-full"
-            allowFullScreen
-            onLoad={() => setIsLoading(false)}
-            sandbox={useSandbox ? "allow-scripts allow-same-origin allow-presentation" : undefined}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        ></iframe>
+        {!isLoading && htmlContent && (
+            <iframe
+                key={iframeKey}
+                srcDoc={htmlContent}
+                className="h-full w-full"
+                allowFullScreen
+                sandbox={useSandbox ? "allow-scripts allow-same-origin allow-presentation" : undefined}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            ></iframe>
+        )}
       </div>
-      <div className="flex items-center justify-between border-t bg-muted/20 px-4 py-3">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t bg-muted/20 px-4 py-3">
         <div className="flex items-center space-x-2">
             <Switch
                 id="sandbox-toggle"
                 checked={useSandbox}
-                onCheckedChange={handleToggleSandbox}
+                onCheckedChange={setUseSandbox}
                 aria-readonly
             />
             <Label htmlFor="sandbox-toggle" className="cursor-pointer text-sm font-medium">
-                Enable Ad-Block (Sandbox)
+                Ad-Block (Sandbox)
             </Label>
         </div>
         <Button onClick={() => router.back()} variant="outline">
@@ -74,9 +103,13 @@ function Player() {
           Back to Details
         </Button>
       </div>
-       <div className="p-4 text-sm text-muted-foreground">
-        <p>If the video doesn't load, try turning off the "Ad-Block (Sandbox)" toggle and wait for the player to reload. Some videos require scripts that are blocked by the sandbox.</p>
-      </div>
+       <Alert variant="default" className="mt-4 bg-muted/50">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>How this works</AlertTitle>
+            <AlertDescription>
+                We&apos;re loading the content in a secure player that blocks ads and pop-ups. If the video doesn&apos;t load, try turning off the &quot;Ad-Block (Sandbox)&quot; toggle.
+            </AlertDescription>
+          </Alert>
     </div>
   );
 }
@@ -96,6 +129,7 @@ function PlayerSkeleton() {
         <div className="flex h-full flex-col">
             <div className="relative w-full aspect-video bg-black">
                 <Skeleton className="h-full w-full" />
+                 <div className="absolute text-white inset-0 flex items-center justify-center">Preparing Secure Player...</div>
             </div>
              <div className="flex items-center justify-between border-t bg-muted/20 px-4 py-3">
                 <div className="flex items-center space-x-2">
