@@ -26,7 +26,7 @@ async function fetchHtml(url: string) {
   }
 }
 
-function parseMovies(html: string, isHomepage: boolean = false): Movie[] {
+function parseMovies(html: string): Movie[] {
   const $ = cheerio.load(html);
   const movies: Movie[] = [];
   const seenPaths = new Set<string>();
@@ -58,12 +58,10 @@ function parseMovies(html: string, isHomepage: boolean = false): Movie[] {
     }
   };
 
-  // Homepage uses a specific layout
-  if (isHomepage) {
-    $('ul.recent-movies li.thumb').each(processElement);
-  }
+  // Homepage and Category pages use this layout
+  $('ul.recent-movies li.thumb').each(processElement);
   
-  // Category and Search pages use this layout
+  // Some pages use this layout, so we try it if the first one fails
   if (movies.length === 0) {
     $('article.TPost.B').each(processElement);
   }
@@ -90,7 +88,7 @@ export async function getHomepageMovies(page: number = 1): Promise<Movie[]> {
   const url = page > 1 ? `${BASE_URL}/page/${page}` : BASE_URL;
   const html = await fetchHtml(url);
   if (!html) return [];
-  const movies = parseMovies(html, true); // Pass true for homepage
+  const movies = parseMovies(html);
   return movies.map(movie => ({
       ...movie,
       description: movie.title, 
@@ -107,7 +105,7 @@ export async function getSearchResults(query: string): Promise<Movie[]> {
 
 export async function getCategoryMovies(path: string, page: number = 1): Promise<Movie[]> {
     const pagePath = page > 1 ? `page/${page}/` : '';
-    const url = `${BASE_URL}/category/${path}/${pagePath}`;
+    const url = `${BASE_URL}/${path.startsWith('category') ? '' : 'category/'}${path}/${pagePath}`;
     const html = await fetchHtml(url);
     if (!html) return [];
     return parseMovies(html);
@@ -370,6 +368,8 @@ export async function getCategories(): Promise<Category[]> {
 
     return categories;
 }
+    
+
     
 
     
