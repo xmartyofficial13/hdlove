@@ -1,5 +1,3 @@
-'use client';
-
 import { notFound } from 'next/navigation';
 import { DownloadButton } from '@/components/DownloadButton';
 import { AlertCircle, Calendar, Eye, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
@@ -15,7 +13,6 @@ import {
 } from '@/components/ui/accordion';
 import type { MovieDetails } from '@/lib/types';
 import { getMovieDetails } from '@/lib/actions';
-import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string | React.ReactNode }) => {
@@ -33,56 +30,31 @@ const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: stri
   );
 };
 
-export default function MoviePage({ params }: { params: { slug: string[] } }) {
-  const [details, setDetails] = useState<MovieDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchDetails() {
-      const path = params.slug.join('/');
-      try {
-        const movieDetails = await getMovieDetails(path);
-        if (!movieDetails) {
-          notFound();
-        } else {
-          setDetails(movieDetails);
-        }
-      } catch (error) {
-        console.error("Failed to fetch movie details", error);
-        notFound();
-      } finally {
-        setLoading(false);
-      }
+export async function generateMetadata({ params }: { params: { slug: string[] } }) {
+    const path = params.slug.join('/');
+    const details = await getMovieDetails(path);
+  
+    if (!details) {
+      return {
+        title: 'Not Found',
+      };
     }
-    fetchDetails();
-  }, [params.slug]);
-
-  if (loading) {
-    return (
-        <div className="container mx-auto max-w-6xl px-4 py-8 animate-pulse">
-            <div className="flex flex-col sm:flex-row gap-4 md:gap-8">
-                <div className="w-full sm:w-1/3 md:w-1/4 shrink-0">
-                    <div className="aspect-[2/3] w-full rounded-xl bg-muted"></div>
-                </div>
-                <div className="w-full sm:w-2/3 md:w-3/4">
-                    <div className="h-8 w-3/4 rounded-md bg-muted"></div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                        <div className="h-6 w-20 rounded-full bg-muted"></div>
-                        <div className="h-6 w-24 rounded-full bg-muted"></div>
-                    </div>
-                    <div className="mt-4 space-y-2">
-                        <div className="h-4 w-full rounded-md bg-muted"></div>
-                        <div className="h-4 w-full rounded-md bg-muted"></div>
-                        <div className="h-4 w-5/6 rounded-md bg-muted"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+  
+    return {
+      title: `${details.title} - NetVlyx`,
+      description: details.description,
+      openGraph: {
+        images: [details.imageUrl],
+      },
+    };
   }
 
+export default async function MoviePage({ params }: { params: { slug: string[] } }) {
+  const path = params.slug.join('/');
+  const details = await getMovieDetails(path);
+
   if (!details) {
-    return null; 
+    notFound();
   }
   
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
