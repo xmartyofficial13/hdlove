@@ -1,19 +1,18 @@
 import { notFound } from 'next/navigation';
-import { DownloadButton } from '@/components/DownloadButton';
-import { AlertCircle, Calendar, Eye, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
+import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import type { MovieDetails } from '@/lib/types';
 import { getMovieDetails } from '@/lib/actions';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { DownloadButton } from '@/components/DownloadButton';
+import { ScreenshotGallery } from '@/components/ScreenshotGallery';
 
 const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string | React.ReactNode }) => {
   if (!value) return null;
@@ -129,35 +128,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           <Separator className="my-8" />
 
           {details.screenshots && details.screenshots.length > 0 && (
-            <div className="mt-12">
-              <div className="mb-6 text-center">
-                <h2 className="font-headline text-2xl font-semibold text-foreground">Get a preview of the visual quality and scenes</h2>
-              </div>
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-2">
-                    {details.screenshots.slice(0, 6).map((src, index) => (
-                        <div key={index} className="relative aspect-video overflow-hidden rounded-lg group">
-                             <img 
-                                src={src} 
-                                alt={`Screenshot ${index + 1}`} 
-                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                                loading="lazy"
-                            />
-                            <div className="absolute inset-0 bg-black/10"></div>
-                            <div className="absolute bottom-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-xs font-bold text-white">
-                                {index + 1}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                 {details.screenshots.length > 6 && (
-                    <div className="mt-6 flex justify-center">
-                        <Button variant="outline">
-                            <Eye className="mr-2 h-4 w-4" />
-                            View All Screenshots
-                        </Button>
-                    </div>
-                )}
-            </div>
+            <ScreenshotGallery screenshots={details.screenshots} />
           )}
           
            {hasEpisodes ? (
