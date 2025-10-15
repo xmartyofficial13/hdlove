@@ -14,7 +14,7 @@ interface CategoryPageProps {
 export async function generateMetadata({ params }: CategoryPageProps) {
   const path = params.slug.join('/');
   // Capitalize each part of the slug for the title
-  const title = params.slug.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+  const title = params.slug.map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' ')).join(' ');
   return {
     title: `${title} - NetVlyx`,
   };

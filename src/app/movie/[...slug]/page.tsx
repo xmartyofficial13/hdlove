@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
+import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -92,12 +93,15 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {details.category?.split('|').map(cat => {
               const cleanedCat = cat.replace(//g, '').trim();
+              const categoryPath = `/category/${cleanedCat.toLowerCase().replace(/ /g, '-')}`;
               if (!cleanedCat) return null;
               return (
-                <Badge key={cleanedCat} variant="outline" className="transition-colors hover:bg-primary/20">
-                  <Tag className="mr-1 h-3 w-3" />
-                  {cleanedCat}
-                </Badge>
+                <Link href={categoryPath} key={cleanedCat} prefetch={false}>
+                  <Badge variant="outline" className="transition-colors hover:bg-primary/20 hover:border-primary/50 cursor-pointer">
+                    <Tag className="mr-1 h-3 w-3" />
+                    {cleanedCat}
+                  </Badge>
+                </Link>
               )
             })}
           </div>

@@ -63,6 +63,20 @@ function parseMovies(html: string): Movie[] {
   if (movies.length === 0) {
     $('article.TPost.B').each(processElement);
   }
+  
+  if (movies.length === 0) {
+    $('.result-item .details .title a').each((_, element) => {
+        const a = $(element);
+        const path = a.attr('href')?.replace(BASE_URL, '') || '';
+        const title = a.text().trim();
+        const imageUrl = $(element).closest('.result-item').find('img').attr('src') || '';
+
+        if(path && title && imageUrl && !seenPaths.has(path) && path !== '/') {
+            movies.push({ title, imageUrl, path });
+            seenPaths.add(path);
+        }
+    })
+  }
 
   return movies;
 }
@@ -166,7 +180,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   });
   
   if (!movieInfo.category) {
-      const categories = $('.page-meta a[href*="/category/"]')
+      const categories = $('.page-meta a[href*="/category/"], .page-meta a[href*="/genre/"]')
         .map((_, el) => $(el).text().trim())
         .get()
         .join(' | ');
