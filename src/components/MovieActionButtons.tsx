@@ -18,10 +18,14 @@ export function MovieActionButtons({
 }: MovieActionButtonsProps) {
   const { toast } = useToast();
 
-  const handleDownloadClick = () => {
-    const downloadSection = document.getElementById('download-section');
-    if (downloadSection) {
-      downloadSection.scrollIntoView({ behavior: 'smooth' });
+  const handleScrollClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    if (sectionId.startsWith('#')) {
+      e.preventDefault();
+      const targetId = sectionId.substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
@@ -54,7 +58,12 @@ export function MovieActionButtons({
     <div className="mt-6 flex flex-wrap items-center gap-3">
       {hasDownloads && (
         <Button
-          onClick={handleDownloadClick}
+          onClick={() => {
+            const downloadSection = document.getElementById('download-section');
+            if (downloadSection) {
+              downloadSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
           className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg transition-transform hover:scale-105 px-4 md:px-8"
         >
           <Download className="mr-2 h-5 w-5" />
@@ -63,7 +72,7 @@ export function MovieActionButtons({
       )}
       {watchUrl && (
         <Button asChild variant="outline" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300 px-4 md:px-8">
-           <Link href={watchUrl}>
+           <Link href={watchUrl} onClick={(e) => handleScrollClick(e, watchUrl)}>
             <Eye className="mr-2 h-5 w-5" />
             Watch
            </Link>

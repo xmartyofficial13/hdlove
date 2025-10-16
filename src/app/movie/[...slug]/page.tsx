@@ -61,7 +61,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
   
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
   const hasDownloads = details.downloadLinks && details.downloadLinks.length > 0;
-  const mainWatchUrl = details.imdbId ? `/player?url=${encodeURIComponent(`https://hikke383ehr.com/play/${details.imdbId}`)}` : undefined;
+  const mainWatchUrl = details.imdbId ? `#watch-section` : undefined;
 
 
   return (
@@ -195,6 +195,24 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
       
       <div id="download-section" className="w-full">
           <Separator className="my-8" />
+
+          {details.imdbId && (
+            <div id="watch-section" className="mt-8 mb-8">
+              <h2 className="font-headline text-2xl font-semibold text-foreground mb-4">
+                Watch Now
+              </h2>
+              <div className="aspect-video w-full overflow-hidden rounded-lg">
+                <iframe
+                  src={`https://hikke383ehr.com/play/${details.imdbId}`}
+                  title={`${details.title} Player`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="h-full w-full"
+                ></iframe>
+              </div>
+            </div>
+          )}
 
           {details.screenshots && details.screenshots.length > 0 && (
             <ScreenshotGallery screenshots={details.screenshots} />
