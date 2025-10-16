@@ -129,7 +129,6 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             <DetailItem icon={<Languages className="h-5 w-5" />} label="Language" value={details.language} />
             <DetailItem icon={<Film className="h-5 w-5" />} label="Director" value={details.director} />
             <DetailItem icon={<User className="h-5 w-5" />} label="Stars" value={details.stars} />
-            <DetailItem icon={<Video className="h-5 w-5" />} label="Quality" value={details.qualities?.map(q => q.name).join(' | ')} />
         </div>
        
        <Separator className="my-8" />
