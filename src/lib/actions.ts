@@ -272,15 +272,21 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     const url = a.attr('href');
     const text = a.text().trim();
 
-    if (url && url.includes('hubdrive.space/f') && !seenUrls.has(url)) {
-      if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
-         allDownloadLinks.push({ 
-          quality: text, 
-          url,
-          title: text
-        });
-        seenUrls.add(url);
-      }
+    if (url && !seenUrls.has(url)) {
+        // Keep watch links and hubdrive links
+        const isWatchLink = url.includes('hdstream') || text.toLowerCase().includes('watch');
+        const isDownloadLink = url.includes('hubdrive.space/f');
+
+        if (isWatchLink || isDownloadLink) {
+             if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
+                allDownloadLinks.push({ 
+                    quality: text, 
+                    url,
+                    title: text
+                });
+                seenUrls.add(url);
+            }
+        }
     }
   });
   
@@ -319,7 +325,10 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       const href = link.attr('href');
       const text = link.text().trim();
       
-      if (href && href.includes('hubdrive.space/f') && !episodeLinkUrls.has(href)) {
+      const isWatchLink = href?.includes('hdstream') || text.toLowerCase().includes('watch');
+      const isDownloadLink = href?.includes('hubdrive.space/f');
+
+      if (href && (isWatchLink || isDownloadLink) && !episodeLinkUrls.has(href)) {
         episodeLinks.push({
           title: text,
           url: href,
@@ -399,21 +408,21 @@ export async function getCategories(): Promise<Category[]> {
       { name: "Documentary", path: "/category/documentary/" },
       { name: "Drama", path: "/category/drama/" },
       { name: "Dual Audio", path: "/category/dual-audio/" },
-      { name: "Family", path_group: "family" },
-      { name: "Fantasy", path_group: "fantasy" },
-      { name: "HD Movies", path_group: "hd-movies" },
-      { name: "Hindi Dubbed", path_group: "hindi-dubbed" },
-      { name: "Hollywood", path_group: "hollywood-movies" },
-      { name: "Horror", path_group: "horror-movies" },
-      { name: "Movie Series", path_group: "movie-series-collection" },
-      { name: "Mystery", path_group: "mystery" },
-      { name: "Romance", path_group: "romantic-movies" },
-      { name: "Sci-Fi", path_group: "sci-fi" },
-      { name: "Thriller", path_group: "thriller" },
-      { name: "TV Shows", path_group: "tv-shows" },
-      { name: "War", path_group: "war" },
-      { name: "Web Series", path_group: "web-series" },
-    ].map(c => ({...c, path: c.path || `/category/${c.path_group}/`}));
+      { name: "Family", path: "/category/family/" },
+      { name: "Fantasy", path: "/category/fantasy/" },
+      { name: "HD Movies", path: "/category/hd-movies/" },
+      { name: "Hindi Dubbed", path: "/category/hindi-dubbed/" },
+      { name: "Hollywood", path: "/category/hollywood-movies/" },
+      { name: "Horror", path: "/category/horror-movies/" },
+      { name: "Movie Series", path: "/category/movie-series-collection/" },
+      { name: "Mystery", path: "/category/mystery/" },
+      { name: "Romance", path: "/category/romantic-movies/" },
+      { name: "Sci-Fi", path: "/category/sci-fi/" },
+      { name: "Thriller", path: "/category/thriller/" },
+      { name: "TV Shows", path: "/category/tv-shows/" },
+      { name: "War", path: "/category/war/" },
+      { name: "Web Series", path: "/category/web-series/" },
+    ];
     return Promise.resolve(categories);
 }
     
@@ -421,6 +430,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 

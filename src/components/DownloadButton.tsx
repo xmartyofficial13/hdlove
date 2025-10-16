@@ -16,10 +16,9 @@ export function DownloadButton({ link }: DownloadButtonProps) {
   const router = useRouter();
   const { toast } = useToast();
   
-  // This component now only handles download links, as watch links are handled on the movie page.
   const isWatchLink = link.quality.toLowerCase().includes('watch') || link.url.includes('hdstream');
 
-  const handleLegacyWatchClick = () => {
+  const handleWatchClick = () => {
     toast({
         title: "Use Main Player",
         description: "Please use the 'Watch' button at the top of the page to stream.",
@@ -28,7 +27,7 @@ export function DownloadButton({ link }: DownloadButtonProps) {
 
   if (isWatchLink) {
     return (
-      <Button variant="secondary" className="h-auto w-full flex-col p-3" onClick={handleLegacyWatchClick}>
+      <Button variant="secondary" className="h-auto w-full flex-col p-3" onClick={handleWatchClick}>
         <PlayCircle className="mb-1 h-5 w-5 text-primary" />
         <span className="text-center text-xs font-semibold leading-tight text-foreground">
           {link.title}
