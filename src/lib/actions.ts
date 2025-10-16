@@ -164,10 +164,11 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   
   const movieInfo: Partial<MovieDetails> = {};
   
-  const infoContainers = ['.kp-hc .mod', '.tec-info', '.page-body > div', '.page-body > p', '.page-body span', '.yQ8hqd.ksSzJd.w6Utff'];
+  const infoContainers = ['.kp-hc .mod', '.tec-info', '.page-body > div', '.page-body > p', '.page-body span', '.yQ8hqd.ksSzJd.w6Utff', 'div.entry.clearfix'];
 
   $(infoContainers.join(', ')).each((_, el) => {
     const container = $(el);
+    const containerHtml = container.html();
 
     // Find iMDB Rating and URL
     if (!movieInfo.rating || !movieInfo.imdbUrl) {
@@ -184,7 +185,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
             }
         });
         
-        // Alternative for some structures
         if(!movieInfo.imdbUrl) {
             const link = container.find('a[href*="imdb.com/title/"]');
             if(link.length > 0){
@@ -199,36 +199,38 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
     if (!movieInfo.category) {
        const genreText = container.text();
-       if (genreText.match(/Genre:|Genres:/i)) {
-         movieInfo.category = genreText.split(/Genre:|Genres:/i)[1].split(/Director:|Stars:|Language:/)[0].trim().replace(/\|/g, ', ');
+       const genreMatch = genreText.match(/(?:Genre|Genres):\s*([^<|]+)/i);
+       if (genreMatch && genreMatch[1]) {
+         const categories = genreMatch[1].split(/,|\|/);
+         movieInfo.category = categories.map(c => c.trim()).filter(c => c && !c.toLowerCase().includes('director') && !c.toLowerCase().includes('stars')).join(', ');
        }
     }
     
     if (!movieInfo.director) {
-        const directorText = container.text();
-        if(directorText.match(/Director:|Directors:/i)) {
-            movieInfo.director = directorText.split(/Director:|Directors:/i)[1].split(/\||Stars:|Language:/)[0].trim();
+        const directorMatch = container.text().match(/(?:Director|Directors):\s*([^<|]+)/i);
+        if(directorMatch && directorMatch[1]) {
+            movieInfo.director = directorMatch[1].split(/\||Stars:|Language:/)[0].trim();
         }
     }
 
     if (!movieInfo.stars) {
-        const starsText = container.text();
-        if(starsText.match(/Stars:|Star:/i)) {
-            movieInfo.stars = starsText.split(/Stars:|Star:/i)[1].split(/\||Director:|Language:/)[0].trim();
+        const starsMatch = container.text().match(/(?:Stars?):\s*([^<|]+)/i);
+        if(starsMatch && starsMatch[1]) {
+            movieInfo.stars = starsMatch[1].split(/\||Director:|Language:/)[0].trim();
         }
     }
     
     if (!movieInfo.language) {
-      const langText = container.text();
-      if(langText.includes('Language:')) {
-          movieInfo.language = langText.split('Language:')[1].split(/\||Quality:/)[0].trim();
+      const langMatch = container.text().match(/Language:\s*([^<|]+)/i);
+      if(langMatch && langMatch[1]) {
+          movieInfo.language = langMatch[1].split(/\||Quality:/)[0].trim();
       }
     }
 
     if (!movieInfo.releaseDate) {
-        const releaseText = container.text();
-        if (releaseText.includes('Release Date:')) {
-            movieInfo.releaseDate = releaseText.split('Release Date:')[1].split(/\|/)[0].trim();
+        const releaseMatch = container.text().match(/(?:Release Date):\s*([^<|]+)/i);
+        if (releaseMatch && releaseMatch[1]) {
+            movieInfo.releaseDate = releaseMatch[1].split(/\|/)[0].trim();
         }
     }
   });
@@ -253,7 +255,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   const allDownloadLinks: DownloadLink[] = [];
   const seenUrls = new Set<string>();
 
-  // Get all external links from the page body, including h2, h3, h4, and h5, and p tags.
   const linkSelectors = [
     '.page-body p a', 
     '.entry-content em a',
@@ -265,6 +266,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     '.entry-content h3 a',
     '.entry-content h4 a',
     '.entry-content h5 a',
+    'div[style*="text-align: center;"] a',
   ];
 
   $(linkSelectors.join(', ')).each((_, element) => {
@@ -273,19 +275,13 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     const text = a.text().trim();
 
     if (url && !seenUrls.has(url)) {
-        // Keep watch links and hubdrive links
-        const isWatchLink = url.includes('hdstream') || text.toLowerCase().includes('watch');
-        const isDownloadLink = url.includes('hubdrive.space/f');
-
-        if (isWatchLink || isDownloadLink) {
-             if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
-                allDownloadLinks.push({ 
-                    quality: text, 
-                    url,
-                    title: text
-                });
-                seenUrls.add(url);
-            }
+        if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
+            allDownloadLinks.push({ 
+                quality: text, 
+                url,
+                title: text
+            });
+            seenUrls.add(url);
         }
     }
   });
@@ -430,6 +426,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
