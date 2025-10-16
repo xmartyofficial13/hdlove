@@ -90,31 +90,44 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           <h1 className="font-headline font-bold tracking-tight text-foreground sm:text-3xl">
             {details.title}
           </h1>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            {details.category?.split(',').map(cat => {
-              const cleanedCat = cat.replace(//g, '').trim();
-              const categoryPath = `/category/${cleanedCat.toLowerCase().replace(/ /g, '-')}`;
-              if (!cleanedCat) return null;
-              return (
-                <Link href={categoryPath} key={cleanedCat} prefetch={false}>
-                  <Badge variant="outline" className="transition-colors hover:bg-primary/20 hover:border-primary/50 cursor-pointer">
-                    <Tag className="mr-1 h-3 w-3" />
-                    {cleanedCat}
-                  </Badge>
-                </Link>
-              )
-            })}
+          <div className="block sm:hidden">
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {details.category?.split(',').map(cat => {
+                  const cleanedCat = cat.replace(//g, '').trim();
+                  const categoryPath = `/category/${cleanedCat.toLowerCase().replace(/ /g, '-')}`;
+                  if (!cleanedCat) return null;
+                  return (
+                    <Link href={categoryPath} key={cleanedCat} prefetch={false}>
+                      <Badge variant="outline" className="transition-colors hover:bg-primary/20 hover:border-primary/50 cursor-pointer">
+                        <Tag className="mr-1 h-3 w-3" />
+                        {cleanedCat}
+                      </Badge>
+                    </Link>
+                  )
+                })}
+            </div>
           </div>
-
            <div className="hidden sm:block">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+                {details.category?.split(',').map(cat => {
+                  const cleanedCat = cat.replace(//g, '').trim();
+                  const categoryPath = `/category/${cleanedCat.toLowerCase().replace(/ /g, '-')}`;
+                  if (!cleanedCat) return null;
+                  return (
+                    <Link href={categoryPath} key={cleanedCat} prefetch={false}>
+                      <Badge variant="outline" className="transition-colors hover:bg-primary/20 hover:border-primary/50 cursor-pointer">
+                        <Tag className="mr-1 h-3 w-3" />
+                        {cleanedCat}
+                      </Badge>
+                    </Link>
+                  )
+                })}
+              </div>
             <RandomStats />
              <MovieActionButtons 
                 movieTitle={details.title}
                 hasDownloads={hasDownloads || hasEpisodes}
                 watchUrl={details.imdbId ? '#watch-section' : undefined}
-                imdbUrl={details.imdbUrl}
-                hasRating={!!details.rating || !!details.imdbUrl}
               />
            </div>
         </div>
@@ -126,8 +139,6 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             movieTitle={details.title}
             hasDownloads={hasDownloads || hasEpisodes}
             watchUrl={details.imdbId ? '#watch-section' : undefined}
-            imdbUrl={details.imdbUrl}
-            hasRating={!!details.rating || !!details.imdbUrl}
         />
       </div>
 
@@ -135,7 +146,17 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
        <Separator className="my-8" />
 
         <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
-            {details.rating && <DetailItem icon={<Star className="h-5 w-5" />} label="iMDB Rating" value={`${details.rating}/10`} />}
+            {details.rating && <DetailItem 
+              icon={<Star className="h-5 w-5" />} 
+              label="iMDB Rating" 
+              value={details.imdbUrl ? (
+                <a href={details.imdbUrl} target="_blank" rel="noopener noreferrer" className="text-base font-medium text-foreground hover:underline">
+                  {`${details.rating}/10`}
+                </a>
+              ) : (
+                `${details.rating}/10`
+              )}
+            />}
             <DetailItem icon={<Calendar className="h-5 w-5" />} label="Release Date" value={details.releaseDate} />
             <DetailItem icon={<Languages className="h-5 w-5" />} label="Language" value={details.language} />
             <DetailItem icon={<Film className="h-5 w-5" />} label="Director" value={details.director} />

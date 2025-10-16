@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Eye, Share2, ExternalLink } from 'lucide-react';
+import { Download, Eye, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
@@ -10,16 +10,12 @@ interface MovieActionButtonsProps {
   movieTitle: string;
   hasDownloads?: boolean;
   watchUrl?: string;
-  imdbUrl?: string;
-  hasRating?: boolean;
 }
 
 export function MovieActionButtons({
   movieTitle,
   hasDownloads,
   watchUrl,
-  imdbUrl,
-  hasRating,
 }: MovieActionButtonsProps) {
   const { toast } = useToast();
 
@@ -55,9 +51,6 @@ export function MovieActionButtons({
     }
   };
   
-  const imdbLink = imdbUrl || `https://www.imdb.com/find?q=${encodeURIComponent(movieTitle)}`;
-
-
   return (
     <div className="mt-6 flex flex-wrap items-center gap-3">
       {hasDownloads && (
@@ -78,14 +71,6 @@ export function MovieActionButtons({
            </Link>
         </Button>
       )}
-       {hasRating && (
-         <a href={imdbLink} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="lg">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                IMDb
-            </Button>
-         </a>
-       )}
       <Button onClick={handleShareClick} variant="outline" size="icon" className="h-12 w-12">
         <Share2 className="h-5 w-5" />
         <span className="sr-only">Share</span>
