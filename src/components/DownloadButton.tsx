@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import type { DownloadLink } from '@/lib/types';
 import { DownloadCloud, PlayCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
 
 interface DownloadButtonProps {
   link: DownloadLink;
@@ -14,15 +13,12 @@ interface DownloadButtonProps {
 
 export function DownloadButton({ link }: DownloadButtonProps) {
   const router = useRouter();
-  const { toast } = useToast();
   
   const isWatchLink = link.quality.toLowerCase().includes('watch') || link.url.includes('hdstream');
 
   const handleWatchClick = () => {
-    toast({
-        title: "Use Main Player",
-        description: "Please use the 'Watch' button at the top of the page to stream.",
-    });
+    const encodedUrl = Buffer.from(link.url).toString('base64');
+    router.push(`/player/${encodedUrl}`);
   };
 
   if (isWatchLink) {

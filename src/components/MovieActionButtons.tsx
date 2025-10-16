@@ -57,14 +57,13 @@ export function MovieActionButtons({
         <Button
           onClick={handleDownloadClick}
           className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg transition-transform hover:scale-105 px-4 md:px-8"
-          size="lg"
         >
           <Download className="mr-2 h-5 w-5" />
           Download
         </Button>
       )}
       {watchUrl && (
-        <Button asChild variant="outline" size="lg" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300 px-4 md:px-8">
+        <Button asChild variant="outline" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300 px-4 md:px-8">
            <Link href={watchUrl}>
             <Eye className="mr-2 h-5 w-5" />
             Watch

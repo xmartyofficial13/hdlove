@@ -62,6 +62,8 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
   
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
   const hasDownloads = details.downloadLinks && details.downloadLinks.length > 0;
+  const mainWatchUrl = details.imdbId ? `/player/${Buffer.from(`https://hikke383ehr.com/play/${details.imdbId}`).toString('base64')}` : undefined;
+
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -127,7 +129,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
              <MovieActionButtons 
                 movieTitle={details.title}
                 hasDownloads={hasDownloads || hasEpisodes}
-                watchUrl={details.imdbId ? '#watch-section' : undefined}
+                watchUrl={mainWatchUrl}
               />
            </div>
         </div>
@@ -138,7 +140,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
         <MovieActionButtons 
             movieTitle={details.title}
             hasDownloads={hasDownloads || hasEpisodes}
-            watchUrl={details.imdbId ? '#watch-section' : undefined}
+            watchUrl={mainWatchUrl}
         />
       </div>
 
@@ -199,27 +201,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             <ScreenshotGallery screenshots={details.screenshots} />
           )}
 
-          {details.imdbId && (
-            <div id="watch-section" className="mt-8">
-                <h2 className="font-headline text-2xl font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <Eye className="h-6 w-6 text-primary"/>
-                    Watch Now
-                </h2>
-                <div className="aspect-video w-full overflow-hidden rounded-lg border">
-                    <iframe
-                        src={`https://hikke383ehr.com/play/${details.imdbId}`}
-                        title={`Watch ${details.title}`}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        referrerPolicy="unsafe-url"
-                        className="h-full w-full"
-                    ></iframe>
-                </div>
-            </div>
-          )}
-          
-           {hasEpisodes ? (
+          {hasEpisodes ? (
             <div className="mt-8">
               <h2 className="font-headline text-2xl font-semibold text-foreground">
                 Episodes
