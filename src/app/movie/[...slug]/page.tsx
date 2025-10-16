@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Youtube, Tag } from 'lucide-react';
+import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { getMovieDetails } from '@/lib/actions';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { DownloadButton } from '@/components/DownloadButton';
 import { ScreenshotGallery } from '@/components/ScreenshotGallery';
+import { RandomStats } from '@/components/RandomStats';
 
 const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string | React.ReactNode }) => {
   if (!value) return null;
@@ -62,8 +63,8 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="flex flex-row gap-4 md:gap-8">
-        <div className="w-1/3 shrink-0 md:w-1/4">
+      <div className="flex flex-col gap-8 md:flex-row md:gap-8">
+        <div className="w-full shrink-0 md:w-1/3">
           <div className="sticky top-24">
              <Dialog>
               <DialogTrigger asChild>
@@ -75,7 +76,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
                   />
                 </div>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl bg-transparent border-0 p-0">
+              <DialogContent className="max-w-3xl bg-transparent border-0 p-0 overflow-hidden">
                 <img
                   src={details.imageUrl}
                   alt={details.title}
@@ -85,7 +86,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             </Dialog>
           </div>
         </div>
-        <div className="w-2/3 md:w-3/4">
+        <div className="w-full md:w-2/3">
           <h1 className="font-headline font-bold tracking-tight text-foreground sm:text-3xl">
             {details.title}
           </h1>
@@ -106,9 +107,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             })}
           </div>
 
-          <p className="mt-4 font-body text-sm leading-relaxed text-muted-foreground md:text-base md:leading-7">
-            {details.description}
-          </p>
+          <RandomStats />
           
           <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
             <DetailItem icon={<Star className="h-5 w-5" />} label="iMDB Rating" value={details.rating ? `${details.rating}/10` : 'N/A'} />
@@ -120,13 +119,35 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           </div>
 
           {details.trailer?.url && (
-            <a href={details.trailer.url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-red-600/20 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600/40">
-              <Youtube className="h-6 w-6 text-red-500" />
-              Watch Trailer
-            </a>
+             <div className="mt-6">
+                <h2 className="font-headline text-2xl font-semibold text-foreground mb-4">
+                    Watch Trailer
+                </h2>
+                <div className="aspect-video w-full overflow-hidden rounded-lg">
+                    <iframe
+                        src={details.trailer.url}
+                        title={`${details.title} Trailer`}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="h-full w-full"
+                    ></iframe>
+                </div>
+            </div>
           )}
         </div>
       </div>
+
+       <Separator className="my-8" />
+       
+       <div>
+         <h2 className="font-headline text-2xl font-semibold text-foreground mb-4">
+           Synopsis
+         </h2>
+         <p className="mt-4 font-body text-sm leading-relaxed text-muted-foreground md:text-base md:leading-7">
+            {details.description}
+          </p>
+       </div>
       
       <div className="w-full">
           <Separator className="my-8" />
