@@ -1,3 +1,4 @@
+
 import { notFound } from 'next/navigation';
 import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Tag } from 'lucide-react';
 import Link from 'next/link';
@@ -129,24 +130,6 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             <DetailItem icon={<User className="h-5 w-5" />} label="Stars" value={details.stars} />
             <DetailItem icon={<Video className="h-5 w-5" />} label="Quality" value={details.qualities?.map(q => q.name).join(' | ')} />
           </div>
-
-          {details.trailer?.url && (
-             <div className="mt-6">
-                <h2 className="font-headline text-2xl font-semibold text-foreground mb-4">
-                    Watch Trailer
-                </h2>
-                <div className="aspect-video w-full overflow-hidden rounded-lg">
-                    <iframe
-                        src={details.trailer.url}
-                        title={`${details.title} Trailer`}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="h-full w-full"
-                    ></iframe>
-                </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -160,6 +143,24 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             {details.description}
           </p>
        </div>
+
+        {details.trailer?.url && (
+            <div className="mt-8">
+            <h2 className="font-headline text-2xl font-semibold text-foreground mb-4">
+                Watch Trailer
+            </h2>
+            <div className="aspect-video w-full overflow-hidden rounded-lg">
+                <iframe
+                    src={details.trailer.url}
+                    title={`${details.title} Trailer`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="h-full w-full"
+                ></iframe>
+            </div>
+            </div>
+        )}
       
       <div id="download-section" className="w-full">
           <Separator className="my-8" />
