@@ -1,9 +1,8 @@
 
 import * as cheerio from 'cheerio';
 import type { Movie, MovieDetails, DownloadLink, Category, Episode } from './types';
-import config from './config.json';
 
-const BASE_URL = config.baseUrl;
+const BASE_URL = "https://hdhub4u.cologne";
 
 async function fetchHtml(url: string) {
   try {
@@ -34,12 +33,12 @@ function parseMovies(html: string): Movie[] {
 
   const processElement = (_: number, element: cheerio.Element) => {
     const a = $(element).find('a').first();
-    let path = a.attr('href')?.replace(BASE_URL, '') || '';
+    let path = a.attr('href') || '';
      if (path.startsWith('http')) {
         try {
             const url = new URL(path);
             const baseHostname = new URL(BASE_URL).hostname;
-            if (url.hostname.endsWith(baseHostname)) {
+            if (url.hostname.endsWith(baseHostname) || url.hostname.includes('hdhub4u')) {
                 path = url.pathname;
             } else {
                 return; // Skip external links
@@ -72,12 +71,12 @@ function parseMovies(html: string): Movie[] {
   if (movies.length === 0) {
     $('.result-item .details .title a').each((_, element) => {
         const a = $(element);
-        let path = a.attr('href')?.replace(BASE_URL, '') || '';
+        let path = a.attr('href') || '';
          if (path.startsWith('http')) {
             try {
                 const url = new URL(path);
                 const baseHostname = new URL(BASE_URL).hostname;
-                 if (url.hostname.endsWith(baseHostname)) {
+                 if (url.hostname.endsWith(baseHostname) || url.hostname.includes('hdhub4u')) {
                     path = url.pathname;
                 } else {
                     return;
@@ -372,6 +371,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
