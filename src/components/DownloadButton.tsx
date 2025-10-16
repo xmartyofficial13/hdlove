@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -17,8 +16,7 @@ export function DownloadButton({ link }: DownloadButtonProps) {
   const isWatchLink = link.quality.toLowerCase().includes('watch') || link.url.includes('hdstream');
 
   const handleWatchClick = () => {
-    const encodedUrl = Buffer.from(link.url).toString('base64');
-    router.push(`/player/${encodedUrl}`);
+    router.push(`/player?url=${encodeURIComponent(link.url)}`);
   };
 
   if (isWatchLink) {

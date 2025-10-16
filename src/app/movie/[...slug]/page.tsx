@@ -1,4 +1,3 @@
-
 import { notFound } from 'next/navigation';
 import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Tag, Eye } from 'lucide-react';
 import Link from 'next/link';
@@ -62,7 +61,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
   
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
   const hasDownloads = details.downloadLinks && details.downloadLinks.length > 0;
-  const mainWatchUrl = details.imdbId ? `/player/${Buffer.from(`https://hikke383ehr.com/play/${details.imdbId}`).toString('base64')}` : undefined;
+  const mainWatchUrl = details.imdbId ? `/player?url=${encodeURIComponent(`https://hikke383ehr.com/play/${details.imdbId}`)}` : undefined;
 
 
   return (
