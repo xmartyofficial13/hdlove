@@ -25,40 +25,34 @@ export async function GET(request: Request) {
     const html = await response.text();
     const $ = cheerio.load(html);
 
+    // Set a base URL so relative paths for CSS/JS work correctly
     const origin = new URL(url).origin;
     if ($('base').length === 0) {
       $('head').prepend(`<base href="${origin}">`);
     }
-    
-    // Check if the URL is from hubstream.art for special handling
-    if (new URL(url).hostname.includes('hubstream.art')) {
-      // For hubstream, be more selective about which scripts to remove
-      $('script').each((_, script) => {
-        const scriptContent = $(script).html();
+
+    // Remove all script tags to prevent ads and malicious code, but be careful
+    $('script').each((_, script) => {
         const scriptSrc = $(script).attr('src');
-        
-        // Remove known ad/tracker scripts and inline ad logic
-        const isAdScript = 
-          scriptSrc?.includes('googletagmanager') ||
-          scriptSrc?.includes('mc.yandex.ru') ||
-          scriptSrc?.includes('eruda') ||
-          scriptContent?.includes('girlieturtle.com');
-
-        if (isAdScript) {
-          $(script).remove();
+        // Keep essential player scripts if they can be identified, otherwise remove all.
+        // For now, a safer approach is to remove all scripts that are not part of the core player library if known.
+        // The provided HTML shows scripts from /assets/, which are likely essential.
+        // The obfuscated scripts and trackers (google, yandex) should be removed.
+        const scriptContent = $(script).html();
+        if (
+            (scriptSrc && !scriptSrc.startsWith('/assets')) || 
+            (scriptContent && (scriptContent.includes('googletagmanager') || scriptContent.includes('yandex') || scriptContent.includes('girlieturtle')))
+        ) {
+            $(script).remove();
         }
-      });
-      // Also remove known ad containers
-      $('div[style*="z-index: 2147483647"]').remove();
-
-    } else {
-      // Default behavior: remove all scripts and iframes for other sites
-      $('script').remove();
-      $('iframe').remove();
-      $('.adsbygoogle').remove();
-      $('[id*="ads"]').remove();
-      $('[class*="ads"]').remove();
-    }
+    });
+    
+    // Also remove external iframes and known ad containers
+    $('iframe').remove();
+    $('.adsbygoogle').remove();
+    $('[id*="ads"]').remove();
+    $('[class*="ads"]').remove();
+    $('div[style*="z-index: 2147483647"]').remove(); // Remove overlay divs
 
 
     // Return the cleaned HTML
