@@ -56,7 +56,7 @@ export function MovieActionButtons({
       {hasDownloads && (
         <Button
           onClick={handleDownloadClick}
-          className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg transition-transform hover:scale-105"
+          className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg transition-transform hover:scale-105 px-4 md:px-8"
           size="lg"
         >
           <Download className="mr-2 h-5 w-5" />
@@ -64,14 +64,14 @@ export function MovieActionButtons({
         </Button>
       )}
       {watchUrl && (
-        <Button asChild variant="outline" size="lg" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300">
+        <Button asChild variant="outline" size="lg" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300 px-4 md:px-8">
            <Link href={watchUrl}>
             <Eye className="mr-2 h-5 w-5" />
             Watch
            </Link>
         </Button>
       )}
-      <Button onClick={handleShareClick} variant="outline" size="icon" className="h-12 w-12">
+      <Button onClick={handleShareClick} variant="outline" size="icon" className="h-11 w-11">
         <Share2 className="h-5 w-5" />
         <span className="sr-only">Share</span>
       </Button>
