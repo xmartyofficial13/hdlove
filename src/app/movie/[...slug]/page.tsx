@@ -69,8 +69,8 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="flex flex-col gap-8 md:flex-row md:gap-8">
-        <div className="w-full shrink-0 md:w-1/3">
+      <div className="flex flex-col gap-8 sm:flex-row sm:gap-8">
+        <div className="w-full shrink-0 sm:w-1/3">
           <div className="sticky top-24">
              <Dialog>
               <DialogTrigger asChild>
@@ -92,7 +92,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             </Dialog>
           </div>
         </div>
-        <div className="w-full md:w-2/3">
+        <div className="w-full sm:w-2/3">
           <h1 className="font-headline font-bold tracking-tight text-foreground sm:text-3xl">
             {details.title}
           </h1>
@@ -123,7 +123,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           />
           
           <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
-            <DetailItem icon={<Star className="h-5 w-5" />} label="iMDB Rating" value={details.rating ? `${details.rating}/10` : 'N/A'} />
+            {details.rating && <DetailItem icon={<Star className="h-5 w-5" />} label="iMDB Rating" value={`${details.rating}/10`} />}
             <DetailItem icon={<Calendar className="h-5 w-5" />} label="Release Date" value={details.releaseDate} />
             <DetailItem icon={<Languages className="h-5 w-5" />} label="Language" value={details.language} />
             <DetailItem icon={<Film className="h-5 w-5" />} label="Director" value={details.director} />
