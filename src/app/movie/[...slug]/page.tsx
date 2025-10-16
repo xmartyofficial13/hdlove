@@ -118,18 +118,20 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             imdbUrl={details.imdbUrl}
             hasRating={!!details.rating || !!details.imdbUrl}
           />
-          
-          <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+        </div>
+      </div>
+
+       <Separator className="my-8" />
+
+        <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
             {details.rating && <DetailItem icon={<Star className="h-5 w-5" />} label="iMDB Rating" value={`${details.rating}/10`} />}
             <DetailItem icon={<Calendar className="h-5 w-5" />} label="Release Date" value={details.releaseDate} />
             <DetailItem icon={<Languages className="h-5 w-5" />} label="Language" value={details.language} />
             <DetailItem icon={<Film className="h-5 w-5" />} label="Director" value={details.director} />
             <DetailItem icon={<User className="h-5 w-5" />} label="Stars" value={details.stars} />
             <DetailItem icon={<Video className="h-5 w-5" />} label="Quality" value={details.qualities?.map(q => q.name).join(' | ')} />
-          </div>
         </div>
-      </div>
-
+       
        <Separator className="my-8" />
        
        <div>
