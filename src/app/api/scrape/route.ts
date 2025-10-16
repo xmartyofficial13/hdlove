@@ -24,10 +24,18 @@ export async function GET(request: Request) {
     const html = await response.text();
     const $ = cheerio.load(html);
 
+    // Set a base URL so relative paths for CSS/JS work correctly
+    const origin = new URL(url).origin;
+    if ($('base').length === 0) {
+      $('head').prepend(`<base href="${origin}">`);
+    }
+
     // Remove all script tags to prevent ads and malicious code
     $('script').remove();
-    $('iframe[src*="ads"]').remove();
-    $('.ads').remove();
+    $('iframe').remove(); // Be more aggressive with iframes
+    $('.adsbygoogle').remove();
+    $('[id*="ads"]').remove();
+    $('[class*="ads"]').remove();
 
 
     // Return the cleaned HTML
