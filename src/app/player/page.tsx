@@ -81,7 +81,7 @@ function Player() {
                 srcDoc={htmlContent}
                 className="h-full w-full"
                 allowFullScreen
-                sandbox={useSandbox ? "allow-scripts allow-presentation allow-forms allow-same-origin" : undefined}
+                sandbox={useSandbox ? "allow-scripts allow-presentation" : undefined}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             ></iframe>
         )}

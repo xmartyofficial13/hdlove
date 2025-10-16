@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 
@@ -24,18 +25,40 @@ export async function GET(request: Request) {
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Set a base URL so relative paths for CSS/JS work correctly
     const origin = new URL(url).origin;
     if ($('base').length === 0) {
       $('head').prepend(`<base href="${origin}">`);
     }
+    
+    // Check if the URL is from hubstream.art for special handling
+    if (new URL(url).hostname.includes('hubstream.art')) {
+      // For hubstream, be more selective about which scripts to remove
+      $('script').each((_, script) => {
+        const scriptContent = $(script).html();
+        const scriptSrc = $(script).attr('src');
+        
+        // Remove known ad/tracker scripts and inline ad logic
+        const isAdScript = 
+          scriptSrc?.includes('googletagmanager') ||
+          scriptSrc?.includes('mc.yandex.ru') ||
+          scriptSrc?.includes('eruda') ||
+          scriptContent?.includes('girlieturtle.com');
 
-    // Remove all script tags to prevent ads and malicious code
-    $('script').remove();
-    $('iframe').remove(); // Be more aggressive with iframes
-    $('.adsbygoogle').remove();
-    $('[id*="ads"]').remove();
-    $('[class*="ads"]').remove();
+        if (isAdScript) {
+          $(script).remove();
+        }
+      });
+      // Also remove known ad containers
+      $('div[style*="z-index: 2147483647"]').remove();
+
+    } else {
+      // Default behavior: remove all scripts and iframes for other sites
+      $('script').remove();
+      $('iframe').remove();
+      $('.adsbygoogle').remove();
+      $('[id*="ads"]').remove();
+      $('[class*="ads"]').remove();
+    }
 
 
     // Return the cleaned HTML
