@@ -1,9 +1,10 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Download, Eye, Share2, ExternalLink } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 interface MovieActionButtonsProps {
   movieTitle: string;
@@ -20,25 +21,12 @@ export function MovieActionButtons({
   imdbUrl,
   hasRating,
 }: MovieActionButtonsProps) {
-  const router = useRouter();
   const { toast } = useToast();
 
   const handleDownloadClick = () => {
     const downloadSection = document.getElementById('download-section');
     if (downloadSection) {
       downloadSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleWatchClick = () => {
-    if (watchUrl) {
-      router.push(`/player?url=${encodeURIComponent(watchUrl)}`);
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'No watchable link found',
-        description: 'We couldn\'t find a direct streaming link for this movie.',
-      });
     }
   };
 
@@ -52,7 +40,6 @@ export function MovieActionButtons({
         });
       } catch (error) {
         console.error('Error sharing:', error);
-        // Fallback for when user cancels share, etc.
         toast({
             variant: 'destructive',
             title: 'Sharing failed',
@@ -60,7 +47,6 @@ export function MovieActionButtons({
         });
       }
     } else {
-      // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(window.location.href);
       toast({
         title: 'Link Copied!',
@@ -85,9 +71,11 @@ export function MovieActionButtons({
         </Button>
       )}
       {watchUrl && (
-        <Button onClick={handleWatchClick} variant="outline" size="lg" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300">
-          <Eye className="mr-2 h-5 w-5" />
-          Watch
+        <Button asChild variant="outline" size="lg" className="border-green-500/50 text-green-400 hover:bg-green-500/10 hover:text-green-300">
+           <Link href={watchUrl}>
+            <Eye className="mr-2 h-5 w-5" />
+            Watch
+           </Link>
         </Button>
       )}
        {hasRating && (

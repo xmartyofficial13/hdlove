@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { DownloadLink } from '@/lib/types';
 import { DownloadCloud, PlayCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 interface DownloadButtonProps {
   link: DownloadLink;
@@ -12,15 +14,21 @@ interface DownloadButtonProps {
 
 export function DownloadButton({ link }: DownloadButtonProps) {
   const router = useRouter();
+  const { toast } = useToast();
+  
+  // This component now only handles download links, as watch links are handled on the movie page.
   const isWatchLink = link.quality.toLowerCase().includes('watch') || link.url.includes('hdstream');
 
-  const handleWatchClick = () => {
-    router.push(`/player?url=${encodeURIComponent(link.url)}`);
+  const handleLegacyWatchClick = () => {
+    toast({
+        title: "Use Main Player",
+        description: "Please use the 'Watch' button at the top of the page to stream.",
+    });
   };
 
   if (isWatchLink) {
     return (
-      <Button variant="secondary" className="h-auto w-full flex-col p-3" onClick={handleWatchClick}>
+      <Button variant="secondary" className="h-auto w-full flex-col p-3" onClick={handleLegacyWatchClick}>
         <PlayCircle className="mb-1 h-5 w-5 text-primary" />
         <span className="text-center text-xs font-semibold leading-tight text-foreground">
           {link.title}

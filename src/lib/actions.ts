@@ -186,38 +186,51 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     };
     
     // Find iMDB Rating and URL
-    if (!movieInfo.rating) {
-        container.find('strong').each((_, strongEl) => {
+    if (!movieInfo.rating || !movieInfo.imdbUrl) {
+        container.find('strong, b').each((_, strongEl) => {
             const strong = $(strongEl);
-            if (strong.text().includes('iMDB Rating:')) {
-                const ratingText = strong.parent().text();
+            if (strong.text().toLowerCase().includes('imdb rating')) {
+                const parent = strong.parent();
+                const ratingText = parent.text();
                 movieInfo.rating = ratingText.match(/([0-9.]+)\/10/)?.[1];
-                const imdbLink = strong.parent().find('a[href*="imdb.com"]');
+                const imdbLink = parent.find('a[href*="imdb.com"]');
                 if (imdbLink.length > 0) {
                     movieInfo.imdbUrl = imdbLink.attr('href');
                 }
             }
         });
+        
+        // Alternative for some structures
+        if(!movieInfo.imdbUrl) {
+            const link = container.find('a[href*="imdb.com/title/"]');
+            if(link.length > 0){
+                movieInfo.imdbUrl = link.attr('href');
+                const ratingText = link.text();
+                if(ratingText.includes('/10')) {
+                    movieInfo.rating = ratingText.match(/([0-9.]+)\/10/)?.[1];
+                }
+            }
+        }
     }
 
     if (!movieInfo.category) {
        const genreText = container.text();
-       if (genreText.includes('Genre:')) {
-         movieInfo.category = genreText.split('Genre:')[1].split(/\|/)[0].trim();
+       if (genreText.match(/Genre:|Genres:/i)) {
+         movieInfo.category = genreText.split(/Genre:|Genres:/i)[1].split(/\|/)[0].trim();
        }
     }
     
     if (!movieInfo.director) {
         const directorText = container.text();
-        if(directorText.includes('Director:')) {
-            movieInfo.director = directorText.split('Director:')[1].split(/\||Stars:|Language:/)[0].trim();
+        if(directorText.match(/Director:|Directors:/i)) {
+            movieInfo.director = directorText.split(/Director:|Directors:/i)[1].split(/\||Stars:|Language:/)[0].trim();
         }
     }
 
     if (!movieInfo.stars) {
         const starsText = container.text();
-        if(starsText.includes('Stars:')) {
-            movieInfo.stars = starsText.split('Stars:')[1].split(/\||Director:|Language:/)[0].trim();
+        if(starsText.match(/Stars:|Star:/i)) {
+            movieInfo.stars = starsText.split(/Stars:|Star:/i)[1].split(/\||Director:|Language:/)[0].trim();
         }
     }
     
@@ -374,6 +387,13 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     }
   });
 
+  if (movieInfo.imdbUrl) {
+    const match = movieInfo.imdbUrl.match(/title\/(tt\d+)/);
+    if (match) {
+        movieInfo.imdbId = match[1];
+    }
+  }
+
 
   if (!title) return null;
 
@@ -424,6 +444,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 

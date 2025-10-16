@@ -1,6 +1,6 @@
 
 import { notFound } from 'next/navigation';
-import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Tag } from 'lucide-react';
+import { AlertCircle, Calendar, Film, Languages, Star, User, Video, Tag, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -63,10 +63,6 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
   const hasDownloads = details.downloadLinks && details.downloadLinks.length > 0;
 
-  const watchLink = [...(details.downloadLinks || []), ...(details.episodeList?.flatMap(e => e.downloadLinks) || [])].find(link => 
-    link.quality.toLowerCase().includes('watch') || link.url.includes('hdstream')
-  );
-
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="flex flex-row gap-4">
@@ -118,7 +114,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           <MovieActionButtons 
             movieTitle={details.title}
             hasDownloads={hasDownloads || hasEpisodes}
-            watchUrl={watchLink?.url}
+            watchUrl={details.imdbId ? '#watch-section' : undefined}
             imdbUrl={details.imdbUrl}
             hasRating={!!details.rating || !!details.imdbUrl}
           />
@@ -144,8 +140,8 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             {details.description}
           </p>
        </div>
-
-        {details.trailer?.url && (
+       
+       {details.trailer?.url && (
             <div className="mt-8">
             <h2 className="font-headline text-2xl font-semibold text-foreground mb-4">
                 Watch Trailer
@@ -168,6 +164,25 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
 
           {details.screenshots && details.screenshots.length > 0 && (
             <ScreenshotGallery screenshots={details.screenshots} />
+          )}
+
+          {details.imdbId && (
+            <div id="watch-section" className="mt-8">
+                <h2 className="font-headline text-2xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <Eye className="h-6 w-6 text-primary"/>
+                    Watch Now
+                </h2>
+                <div className="aspect-video w-full overflow-hidden rounded-lg border">
+                    <iframe
+                        src={`https://hikke383ehr.com/play/${details.imdbId}`}
+                        title={`Watch ${details.title}`}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="h-full w-full"
+                    ></iframe>
+                </div>
+            </div>
           )}
           
            {hasEpisodes ? (

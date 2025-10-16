@@ -1,3 +1,4 @@
+
 export interface Movie {
   title: string;
   imageUrl: string;
@@ -43,6 +44,7 @@ export interface MovieDetails extends Movie {
   stars?: string;
   director?: string;
   imdbUrl?: string;
+  imdbId?: string;
 }
 
 export interface Category {
