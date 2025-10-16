@@ -119,7 +119,8 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             movieTitle={details.title}
             hasDownloads={hasDownloads || hasEpisodes}
             watchUrl={watchLink?.url}
-            hasRating={!!details.rating}
+            imdbUrl={details.imdbUrl}
+            hasRating={!!details.rating || !!details.imdbUrl}
           />
           
           <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">

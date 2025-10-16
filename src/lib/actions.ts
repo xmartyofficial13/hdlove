@@ -170,6 +170,10 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
     if (text.match(/iMDB Rating:\s*([0-9.]+)/)) {
         movieInfo.rating = text.match(/iMDB Rating:\s*([0-9.]+)/)?.[1];
+        const imdbLink = element.find('a[href*="imdb.com"]');
+        if (imdbLink.length > 0) {
+            movieInfo.imdbUrl = imdbLink.attr('href');
+        }
     }
     if (text.match(/Genre:|Genres:/)) {
         movieInfo.category = element.find('a').map((_, a) => $(a).text().trim()).get().join(' | ') || text.replace(/Genre:|Genres:/, '').trim();
@@ -371,6 +375,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 

@@ -42,6 +42,7 @@ export interface MovieDetails extends Movie {
   qualities?: { name: string; size: string }[];
   stars?: string;
   director?: string;
+  imdbUrl?: string;
 }
 
 export interface Category {

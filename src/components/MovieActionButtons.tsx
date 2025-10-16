@@ -9,6 +9,7 @@ interface MovieActionButtonsProps {
   movieTitle: string;
   hasDownloads?: boolean;
   watchUrl?: string;
+  imdbUrl?: string;
   hasRating?: boolean;
 }
 
@@ -16,6 +17,7 @@ export function MovieActionButtons({
   movieTitle,
   hasDownloads,
   watchUrl,
+  imdbUrl,
   hasRating,
 }: MovieActionButtonsProps) {
   const router = useRouter();
@@ -67,7 +69,7 @@ export function MovieActionButtons({
     }
   };
   
-  const imdbSearchUrl = `https://www.imdb.com/find?q=${encodeURIComponent(movieTitle)}`;
+  const imdbLink = imdbUrl || `https://www.imdb.com/find?q=${encodeURIComponent(movieTitle)}`;
 
 
   return (
@@ -89,7 +91,7 @@ export function MovieActionButtons({
         </Button>
       )}
        {hasRating && (
-         <a href={imdbSearchUrl} target="_blank" rel="noopener noreferrer">
+         <a href={imdbLink} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" size="lg">
                 <ExternalLink className="mr-2 h-4 w-4" />
                 IMDb
