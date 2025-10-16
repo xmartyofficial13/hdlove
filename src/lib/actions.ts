@@ -257,6 +257,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
   const linkSelectors = [
     '.page-body p a', 
+    '.entry-content p a',
     '.entry-content em a',
     '.page-body h2 a', 
     '.page-body h3 a', 
@@ -423,6 +424,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
