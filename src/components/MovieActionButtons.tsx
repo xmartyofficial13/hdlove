@@ -9,12 +9,14 @@ interface MovieActionButtonsProps {
   movieTitle: string;
   hasDownloads?: boolean;
   watchUrl?: string;
+  hasRating?: boolean;
 }
 
 export function MovieActionButtons({
   movieTitle,
   hasDownloads,
   watchUrl,
+  hasRating,
 }: MovieActionButtonsProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -48,6 +50,12 @@ export function MovieActionButtons({
         });
       } catch (error) {
         console.error('Error sharing:', error);
+        // Fallback for when user cancels share, etc.
+        toast({
+            variant: 'destructive',
+            title: 'Sharing failed',
+            description: 'The content could not be shared.',
+        });
       }
     } else {
       // Fallback for browsers that don't support Web Share API
@@ -80,12 +88,14 @@ export function MovieActionButtons({
           Watch
         </Button>
       )}
-       <a href={imdbSearchUrl} target="_blank" rel="noopener noreferrer">
-         <Button variant="outline" size="lg">
-           <ExternalLink className="mr-2 h-4 w-4" />
-           IMDb
-         </Button>
-       </a>
+       {hasRating && (
+         <a href={imdbSearchUrl} target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="lg">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                IMDb
+            </Button>
+         </a>
+       )}
       <Button onClick={handleShareClick} variant="outline" size="icon" className="h-12 w-12">
         <Share2 className="h-5 w-5" />
         <span className="sr-only">Share</span>
