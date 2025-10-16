@@ -66,7 +66,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="flex flex-row gap-4">
-        <div className="w-1/4 shrink-0">
+        <div className="w-[100px] shrink-0 md:w-[200px]">
              <Dialog>
               <DialogTrigger asChild>
                 <div className="relative aspect-[2/3] w-full cursor-pointer overflow-hidden rounded-xl shadow-2xl shadow-primary/10 transition-transform hover:scale-105">
