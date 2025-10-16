@@ -92,7 +92,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           </h1>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            {details.category?.split('|').map(cat => {
+            {details.category?.split(',').map(cat => {
               const cleanedCat = cat.replace(//g, '').trim();
               const categoryPath = `/category/${cleanedCat.toLowerCase().replace(/ /g, '-')}`;
               if (!cleanedCat) return null;

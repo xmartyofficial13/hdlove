@@ -169,22 +169,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   $(infoContainers.join(', ')).each((_, el) => {
     const container = $(el);
 
-    // Function to extract text cleanly from a container
-    const extractInfo = (regex: RegExp, cleanRegex: RegExp) => {
-        const html = container.html() || '';
-        const match = html.match(regex);
-        if (match) {
-            const tempEl = cheerio.load(`<div>${match[0]}</div>`);
-            // Try to get link first
-            const link = tempEl('a');
-            if (link.length > 0) return link.map((_, a) => $(a).text().trim()).get().join(', ');
-            
-            // If no link, get text and clean it
-            return tempEl('div').text().replace(cleanRegex, '').trim();
-        }
-        return null;
-    };
-    
     // Find iMDB Rating and URL
     if (!movieInfo.rating || !movieInfo.imdbUrl) {
         container.find('strong, b').each((_, strongEl) => {
@@ -216,7 +200,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     if (!movieInfo.category) {
        const genreText = container.text();
        if (genreText.match(/Genre:|Genres:/i)) {
-         movieInfo.category = genreText.split(/Genre:|Genres:/i)[1].split(/\|/)[0].trim();
+         movieInfo.category = genreText.split(/Genre:|Genres:/i)[1].split(/Director:|Stars:|Language:/)[0].trim().replace(/\|/g, ', ');
        }
     }
     
@@ -262,7 +246,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       const categories = $('.page-meta a[href*="/category/"], .page-meta a[href*="/genre/"]')
         .map((_, el) => $(el).text().trim())
         .get()
-        .join(' | ');
+        .join(', ');
       if (categories) movieInfo.category = categories;
   }
 
@@ -437,6 +421,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
