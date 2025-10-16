@@ -275,7 +275,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     const url = a.attr('href');
     const text = a.text().trim();
 
-    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url) && !url.includes('/how-to-download')) {
+    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url) && !url.includes('/how-to-download') && url.includes('hubdrive.space/f')) {
       if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
          allDownloadLinks.push({ 
           quality: text, 
@@ -424,6 +424,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
