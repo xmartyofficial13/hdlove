@@ -164,36 +164,85 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   
   const movieInfo: Partial<MovieDetails> = {};
   
-  $('.kp-hc .mod, .tec-info, .page-body > div, .page-body > p, .page-body span').each((_, el) => {
-    const element = $(el);
-    let text = element.clone().children().remove().end().text().trim();
+  const infoContainers = ['.kp-hc .mod', '.tec-info', '.page-body > div', '.page-body > p', '.page-body span', '.yQ8hqd.ksSzJd.w6Utff'];
 
-    if (text.match(/iMDB Rating:\s*([0-9.]+)/)) {
-        movieInfo.rating = text.match(/iMDB Rating:\s*([0-9.]+)/)?.[1];
-        const imdbLink = element.find('a[href*="imdb.com"]');
-        if (imdbLink.length > 0) {
-            movieInfo.imdbUrl = imdbLink.attr('href');
+  $(infoContainers.join(', ')).each((_, el) => {
+    const container = $(el);
+
+    // Function to extract text cleanly from a container
+    const extractInfo = (regex: RegExp, cleanRegex: RegExp) => {
+        const html = container.html() || '';
+        const match = html.match(regex);
+        if (match) {
+            const tempEl = cheerio.load(`<div>${match[0]}</div>`);
+            // Try to get link first
+            const link = tempEl('a');
+            if (link.length > 0) return link.map((_, a) => $(a).text().trim()).get().join(', ');
+            
+            // If no link, get text and clean it
+            return tempEl('div').text().replace(cleanRegex, '').trim();
+        }
+        return null;
+    };
+    
+    // Find iMDB Rating and URL
+    if (!movieInfo.rating) {
+        container.find('strong').each((_, strongEl) => {
+            const strong = $(strongEl);
+            if (strong.text().includes('iMDB Rating:')) {
+                const ratingText = strong.parent().text();
+                movieInfo.rating = ratingText.match(/([0-9.]+)\/10/)?.[1];
+                const imdbLink = strong.parent().find('a[href*="imdb.com"]');
+                if (imdbLink.length > 0) {
+                    movieInfo.imdbUrl = imdbLink.attr('href');
+                }
+            }
+        });
+    }
+
+    if (!movieInfo.category) {
+       const genreText = container.text();
+       if (genreText.includes('Genre:')) {
+         movieInfo.category = genreText.split('Genre:')[1].split(/\|/)[0].trim();
+       }
+    }
+    
+    if (!movieInfo.director) {
+        const directorText = container.text();
+        if(directorText.includes('Director:')) {
+            movieInfo.director = directorText.split('Director:')[1].split(/\||Stars:|Language:/)[0].trim();
         }
     }
-    if (text.match(/Genre:|Genres:/)) {
-        movieInfo.category = element.find('a').map((_, a) => $(a).text().trim()).get().join(' | ') || text.replace(/Genre:|Genres:/, '').trim();
+
+    if (!movieInfo.stars) {
+        const starsText = container.text();
+        if(starsText.includes('Stars:')) {
+            movieInfo.stars = starsText.split('Stars:')[1].split(/\||Director:|Language:/)[0].trim();
+        }
     }
-     if (text.match(/Director:/)) {
-        movieInfo.director = element.find('a').map((_, a) => $(a).text().trim()).get().join(', ') || text.replace(/Director:/, '').trim();
+    
+    if (!movieInfo.language) {
+      const langText = container.text();
+      if(langText.includes('Language:')) {
+          movieInfo.language = langText.split('Language:')[1].split(/\||Quality:/)[0].trim();
+      }
     }
-     if (text.match(/Stars:|Creator:/)) {
-        movieInfo.stars = element.find('a').map((_, a) => $(a).text().trim()).get().join(', ') || text.replace(/Stars:|Creator:/, '').trim();
+
+    if (!movieInfo.qualities) {
+      const qualityText = container.text();
+      if(qualityText.includes('Quality:')) {
+          movieInfo.qualities = qualityText.split('Quality:')[1].split(/\|/g).map(q => ({ name: q.trim(), size: 'N/A' }));
+      }
     }
-    if (text.match(/Language:/)) {
-        movieInfo.language = text.replace('Language:', '').trim();
-    }
-    if (text.match(/Release Date:/)) {
-        movieInfo.releaseDate = text.replace('Release Date:', '').trim();
-    }
-     if (text.match(/Quality:/)) {
-        movieInfo.qualities = text.replace('Quality:', '').split('|').map(q => ({ name: q.trim(), size: 'N/A' }));
+
+    if (!movieInfo.releaseDate) {
+        const releaseText = container.text();
+        if (releaseText.includes('Release Date:')) {
+            movieInfo.releaseDate = releaseText.split('Release Date:')[1].split(/\|/)[0].trim();
+        }
     }
   });
+
 
   $('.page-meta em.material-text').each((_, el) => {
     const text = $(el).text().trim();
@@ -375,6 +424,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
