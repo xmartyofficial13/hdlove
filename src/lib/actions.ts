@@ -164,77 +164,41 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
   
   const movieInfo: Partial<MovieDetails> = {};
   
-  const infoContainers = ['.kp-hc .mod', '.tec-info', '.page-body > div', '.page-body > p', '.page-body span', '.yQ8hqd.ksSzJd.w6Utff', 'div.entry.clearfix'];
+  $('.kp-hc .mod, .tec-info, .page-body > div, .page-body > p, .page-body span').each((_, el) => {
+    const element = $(el);
+    let text = element.clone().children().remove().end().text().trim();
 
-  $(infoContainers.join(', ')).each((_, el) => {
-    const container = $(el);
-    const containerHtml = container.html();
-
-    // Find iMDB Rating and URL
-    if (!movieInfo.rating || !movieInfo.imdbUrl) {
-        container.find('strong, b').each((_, strongEl) => {
-            const strong = $(strongEl);
-            if (strong.text().toLowerCase().includes('imdb rating')) {
-                const parent = strong.parent();
-                const ratingText = parent.text();
-                movieInfo.rating = ratingText.match(/([0-9.]+)\/10/)?.[1];
-                const imdbLink = parent.find('a[href*="imdb.com"]');
-                if (imdbLink.length > 0) {
-                    movieInfo.imdbUrl = imdbLink.attr('href');
-                }
-            }
-        });
-        
-        if(!movieInfo.imdbUrl) {
-            const link = container.find('a[href*="imdb.com/title/"]');
-            if(link.length > 0){
-                movieInfo.imdbUrl = link.attr('href');
-                const ratingText = link.text();
-                if(ratingText.includes('/10')) {
-                    movieInfo.rating = ratingText.match(/([0-9.]+)\/10/)?.[1];
-                }
-            }
-        }
+    if (text.match(/iMDB Rating:\s*([0-9.]+)/)) {
+        movieInfo.rating = text.match(/iMDB Rating:\s*([0-9.]+)/)?.[1];
     }
-
-    if (!movieInfo.category) {
-       const genreText = container.text();
-       const genreMatch = genreText.match(/(?:Genre|Genres):\s*([^<|]+)/i);
-       if (genreMatch && genreMatch[1]) {
-         const categories = genreMatch[1].split(/,|\|/);
-         movieInfo.category = categories.map(c => c.trim()).filter(c => c && !c.toLowerCase().includes('director') && !c.toLowerCase().includes('stars')).join(', ');
-       }
+    if (text.match(/Genre:|Genres:/)) {
+        movieInfo.category = element.find('a').map((_, a) => $(a).text().trim()).get().join(', ');
     }
-    
-    if (!movieInfo.director) {
-        const directorMatch = container.text().match(/(?:Director|Directors):\s*([^<|]+)/i);
-        if(directorMatch && directorMatch[1]) {
-            movieInfo.director = directorMatch[1].split(/\||Stars:|Language:/)[0].trim();
-        }
+     if (text.match(/Director:/)) {
+        movieInfo.director = element.find('a').map((_, a) => $(a).text().trim()).get().join(', ') || text.replace(/Director:/, '').trim();
     }
-
-    if (!movieInfo.stars) {
-        const starsMatch = container.text().match(/(?:Stars?):\s*([^<|]+)/i);
-        if(starsMatch && starsMatch[1]) {
-            movieInfo.stars = starsMatch[1].split(/\||Director:|Language:/)[0].trim();
-        }
+     if (text.match(/Stars:|Creator:/)) {
+        movieInfo.stars = element.find('a').map((_, a) => $(a).text().trim()).get().join(', ') || text.replace(/Stars:|Creator:/, '').trim();
     }
-    
-    if (!movieInfo.language) {
-      const langMatch = container.text().match(/Language:\s*([^<|]+)/i);
-      if(langMatch && langMatch[1]) {
-          movieInfo.language = langMatch[1].split(/\||Quality:/)[0].trim();
-      }
+    if (text.match(/Language:/)) {
+        movieInfo.language = text.replace('Language:', '').trim();
     }
-
-    if (!movieInfo.releaseDate) {
-        const releaseMatch = container.text().match(/(?:Release Date):\s*([^<|]+)/i);
-        if (releaseMatch && releaseMatch[1]) {
-            movieInfo.releaseDate = releaseMatch[1].split(/\|/)[0].trim();
-        }
+    if (text.match(/Release Date:/)) {
+        movieInfo.releaseDate = text.replace('Release Date:', '').trim();
+    }
+     if (text.match(/Quality:/)) {
+        movieInfo.qualities = text.replace('Quality:', '').split('|').map(q => ({ name: q.trim(), size: 'N/A' }));
     }
   });
 
+  const imdbUrl = $('a[href*="imdb.com/title/"]').attr('href');
+  if (imdbUrl) {
+    movieInfo.imdbUrl = imdbUrl;
+    const imdbIdMatch = imdbUrl.match(/tt\d+/);
+    if (imdbIdMatch) {
+      movieInfo.imdbId = imdbIdMatch[0];
+    }
+  }
 
   $('.page-meta em.material-text').each((_, el) => {
     const text = $(el).text().trim();
@@ -257,7 +221,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
   const linkSelectors = [
     '.page-body p a', 
-    '.entry-content p a',
     '.entry-content em a',
     '.page-body h2 a', 
     '.page-body h3 a', 
@@ -267,7 +230,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     '.entry-content h3 a',
     '.entry-content h4 a',
     '.entry-content h5 a',
-    'div[style*="text-align: center;"] a',
   ];
 
   $(linkSelectors.join(', ')).each((_, element) => {
@@ -275,7 +237,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     const url = a.attr('href');
     const text = a.text().trim();
 
-    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url) && !url.includes('/how-to-download') && url.includes('hubdrive.space/f')) {
+    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url) && !url.includes('/how-to-download')) {
       if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
          allDownloadLinks.push({ 
           quality: text, 
@@ -306,12 +268,10 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     }
 
     let container: cheerio.Cheerio<cheerio.Element> = header;
-    // Look for links in the header itself, then siblings until the next header
     if (header.find('a').length === 0) {
       container = header.nextUntil('h3, h2, hr');
     }
 
-    // If still no links, try a broader search in all siblings
     if(container.find('a').length === 0) {
       container = header.siblings();
     }
@@ -341,7 +301,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     }
   });
 
-  // Filter out episode links from allDownloadLinks
   const movieDownloadLinks = allDownloadLinks.filter(link => !episodeLinkUrls.has(link.url));
 
   const trailerUrl = $('iframe[src*="youtube.com/embed"]').attr('src');
@@ -361,18 +320,10 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
 
   $(screenshotSelectors.join(', ')).each((_, el) => {
     const src = $(el).attr('src');
-    // Ensure we don't add the main poster image to screenshots
     if (src && !screenshots.includes(src) && src !== imageUrl) {
         screenshots.push(src);
     }
   });
-
-  if (movieInfo.imdbUrl) {
-    const match = movieInfo.imdbUrl.match(/title\/(tt\d+)/);
-    if (match) {
-        movieInfo.imdbId = match[1];
-    }
-  }
 
 
   if (!title) return null;
@@ -419,25 +370,3 @@ export async function getCategories(): Promise<Category[]> {
     ];
     return Promise.resolve(categories);
 }
-    
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

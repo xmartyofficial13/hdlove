@@ -50,4 +50,5 @@ export interface MovieDetails extends Movie {
 export interface Category {
   name: string;
   path: string;
+  path_group?: string;
 }
