@@ -67,7 +67,6 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="flex flex-row gap-4">
         <div className="w-1/4 shrink-0">
-          <div className="sticky top-24">
              <Dialog>
               <DialogTrigger asChild>
                 <div className="relative aspect-[2/3] w-full cursor-pointer overflow-hidden rounded-xl shadow-2xl shadow-primary/10 transition-transform hover:scale-105">
@@ -86,9 +85,8 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
                 />
               </DialogContent>
             </Dialog>
-          </div>
         </div>
-        <div className="w-3/4">
+        <div className="w-3/4 flex flex-col">
           <h1 className="font-headline font-bold tracking-tight text-foreground sm:text-3xl">
             {details.title}
           </h1>
@@ -109,17 +107,30 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
             })}
           </div>
 
-          <RandomStats />
-
-          <MovieActionButtons 
+           <div className="hidden sm:block">
+            <RandomStats />
+             <MovieActionButtons 
+                movieTitle={details.title}
+                hasDownloads={hasDownloads || hasEpisodes}
+                watchUrl={details.imdbId ? '#watch-section' : undefined}
+                imdbUrl={details.imdbUrl}
+                hasRating={!!details.rating || !!details.imdbUrl}
+              />
+           </div>
+        </div>
+      </div>
+      
+      <div className="block sm:hidden mt-4">
+        <RandomStats />
+        <MovieActionButtons 
             movieTitle={details.title}
             hasDownloads={hasDownloads || hasEpisodes}
             watchUrl={details.imdbId ? '#watch-section' : undefined}
             imdbUrl={details.imdbUrl}
             hasRating={!!details.rating || !!details.imdbUrl}
-          />
-        </div>
+        />
       </div>
+
 
        <Separator className="my-8" />
 
