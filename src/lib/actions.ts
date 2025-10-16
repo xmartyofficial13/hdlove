@@ -241,13 +241,6 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       }
     }
 
-    if (!movieInfo.qualities) {
-      const qualityText = container.text();
-      if(qualityText.includes('Quality:')) {
-          movieInfo.qualities = qualityText.split('Quality:')[1].split(/\|/g).map(q => ({ name: q.trim(), size: 'N/A' }));
-      }
-    }
-
     if (!movieInfo.releaseDate) {
         const releaseText = container.text();
         if (releaseText.includes('Release Date:')) {
@@ -295,7 +288,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     const url = a.attr('href');
     const text = a.text().trim();
 
-    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url) && !url.includes('/how-to-download')) {
+    if (url && url.includes('hubdrive.space/f') && !seenUrls.has(url)) {
       if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
          allDownloadLinks.push({ 
           quality: text, 
@@ -342,7 +335,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
       const href = link.attr('href');
       const text = link.text().trim();
       
-      if (href && text && href.startsWith('http') && !episodeLinkUrls.has(href)) {
+      if (href && href.includes('hubdrive.space/f') && !episodeLinkUrls.has(href)) {
         episodeLinks.push({
           title: text,
           url: href,
@@ -444,6 +437,7 @@ export async function getCategories(): Promise<Category[]> {
     
 
     
+
 
 
 
