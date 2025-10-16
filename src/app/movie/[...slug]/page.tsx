@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { DownloadButton } from '@/components/DownloadButton';
 import { ScreenshotGallery } from '@/components/ScreenshotGallery';
 import { RandomStats } from '@/components/RandomStats';
+import { MovieActionButtons } from '@/components/MovieActionButtons';
 
 const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string | React.ReactNode }) => {
   if (!value) return null;
@@ -60,6 +61,10 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
   
   const hasEpisodes = details.episodeList && details.episodeList.length > 0;
   const hasDownloads = details.downloadLinks && details.downloadLinks.length > 0;
+
+  const watchLink = [...(details.downloadLinks || []), ...(details.episodeList?.flatMap(e => e.downloadLinks) || [])].find(link => 
+    link.quality.toLowerCase().includes('watch') || link.url.includes('hdstream')
+  );
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -108,6 +113,12 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           </div>
 
           <RandomStats />
+
+          <MovieActionButtons 
+            movieTitle={details.title}
+            hasDownloads={hasDownloads || hasEpisodes}
+            watchUrl={watchLink?.url}
+          />
           
           <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
             <DetailItem icon={<Star className="h-5 w-5" />} label="iMDB Rating" value={details.rating ? `${details.rating}/10` : 'N/A'} />
@@ -149,7 +160,7 @@ export default async function MoviePage({ params }: { params: { slug: string[] }
           </p>
        </div>
       
-      <div className="w-full">
+      <div id="download-section" className="w-full">
           <Separator className="my-8" />
 
           {details.screenshots && details.screenshots.length > 0 && (
