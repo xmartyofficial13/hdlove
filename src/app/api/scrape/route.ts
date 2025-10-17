@@ -30,13 +30,15 @@ export async function GET(request: Request) {
     let html = await response.text();
     const $ = cheerio.load(html);
 
+    // Inject CSS to hide specific elements
+    $('head').prepend('<style>.header, .download { display: none !important; }</style>');
+
     const origin = new URL(url).origin;
     if ($('base').length === 0) {
       $('head').prepend(`<base href="${origin}">`);
     }
 
     // Find and rewrite video stream URLs
-    // This is a bit of a guess, we look for common patterns in scripts
     $('script').each((_, script) => {
         const scriptContent = $(script).html();
         if (scriptContent) {

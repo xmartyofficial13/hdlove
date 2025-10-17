@@ -106,7 +106,7 @@ function Player() {
 
 export default function PlayerPage() {
     return (
-        <div className="container mx-auto h-full max-w-6xl px-4 py-8">
+        <div className="w-full h-full py-8">
             <Suspense fallback={<PlayerSkeleton />}>
                 <Player />
             </Suspense>
