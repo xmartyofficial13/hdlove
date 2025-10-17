@@ -29,9 +29,12 @@ export async function GET(request: Request) {
 
     let html = await response.text();
     const $ = cheerio.load(html);
+    
+    // Remove specific ad/tracker scripts
+    $('script[src*="bvtpk.com"]').remove();
 
     // Inject CSS to hide specific elements
-    $('head').prepend('<style>.header, .download { display: none !important; }</style>');
+    $('head').prepend('<style>.header, .download, .nav, .tab, .tab-content, .nav, .rating, .footer{ display: none !important; } .section{padding:2px;}</style>');
 
     const origin = new URL(url).origin;
     if ($('base').length === 0) {
