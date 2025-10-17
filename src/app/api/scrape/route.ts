@@ -48,7 +48,6 @@ export async function GET(request: Request) {
     });
     
     // Also remove external iframes and known ad containers
-    $('iframe').remove();
     $('.adsbygoogle').remove();
     $('[id*="ads"]').remove();
     $('[class*="ads"]').remove();
