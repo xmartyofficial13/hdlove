@@ -30,56 +30,8 @@ export async function GET(request: Request) {
     if ($('base').length === 0) {
       $('head').prepend(`<base href="${origin}">`);
     }
-    
-    const adScriptKeywords = [
-        'hdstream4u.com/ad',
-        'vf.accoyblee.com',
-        'bvtpk.com',
-        'googletagmanager',
-        'yandex',
-        'girlieturtle',
-        'your-ad-provider.com' // Add other known ad script keywords here
-    ];
 
-
-    // Remove script tags that are known to be ads
-    $('script').each((_, script) => {
-        const scriptSrc = $(script).attr('src');
-        const scriptContent = $(script).html();
-
-        let isAdScript = false;
-
-        if (scriptSrc) {
-            for (const keyword of adScriptKeywords) {
-                if (scriptSrc.includes(keyword)) {
-                    isAdScript = true;
-                    break;
-                }
-            }
-        }
-
-        if (!isAdScript && scriptContent) {
-             for (const keyword of adScriptKeywords) {
-                if (scriptContent.includes(keyword)) {
-                    isAdScript = true;
-                    break;
-                }
-            }
-        }
-        
-        if (isAdScript) {
-            $(script).remove();
-        }
-    });
-    
-    // Also remove external iframes and known ad containers
-    $('.adsbygoogle').remove();
-    $('[id*="ads"]').remove();
-    $('[class*="ads"]').remove();
-    $('div[style*="z-index: 2147483647"]').remove(); // Remove overlay divs
-
-
-    // Return the cleaned HTML
+    // Return the full HTML without removing scripts
     return new NextResponse($.html(), {
       headers: {
         'Content-Type': 'text/html',
