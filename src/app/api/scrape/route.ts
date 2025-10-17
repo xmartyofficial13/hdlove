@@ -2,6 +2,11 @@
 import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 
+// Function to determine if a URL is for a video stream
+const isStreamUrl = (url: string): boolean => {
+  return url.includes('.m3u8') || url.includes('master.m3u8');
+};
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const url = searchParams.get('url');
@@ -22,21 +27,45 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: `Failed to fetch the URL: ${response.statusText}` }, { status: response.status });
     }
 
-    const html = await response.text();
+    let html = await response.text();
     const $ = cheerio.load(html);
 
-    // Set a base URL so relative paths for CSS/JS work correctly
     const origin = new URL(url).origin;
     if ($('base').length === 0) {
       $('head').prepend(`<base href="${origin}">`);
     }
 
-    // Return the full HTML without removing scripts
+    // Find and rewrite video stream URLs
+    // This is a bit of a guess, we look for common patterns in scripts
+    $('script').each((_, script) => {
+        const scriptContent = $(script).html();
+        if (scriptContent) {
+            const urlRegex = /https?:\/\/[^\s'"]+/g;
+            let newScriptContent = scriptContent;
+            
+            const matches = scriptContent.match(urlRegex);
+            if(matches) {
+                matches.forEach(foundUrl => {
+                    if (isStreamUrl(foundUrl)) {
+                        // The URL is inside quotes, so we need to handle that
+                        const originalUrlInScript = `'${foundUrl}'` // or `"${foundUrl}"`
+                        const proxiedUrl = `/api/stream/${encodeURIComponent(foundUrl)}`;
+                        const proxiedUrlInScript = `'${proxiedUrl}'`;
+                        newScriptContent = newScriptContent.replace(originalUrlInScript, proxiedUrlInScript);
+                    }
+                });
+            }
+             $(script).html(newScriptContent);
+        }
+    });
+    
+    // Return the modified HTML
     return new NextResponse($.html(), {
       headers: {
         'Content-Type': 'text/html',
       },
     });
+
   } catch (error: any) {
     console.error('Scraping error:', error);
     return NextResponse.json({ error: 'Failed to scrape the page', details: error.message }, { status: 500 });

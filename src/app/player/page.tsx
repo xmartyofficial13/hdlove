@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import Head from 'next/head';
 
 function Player() {
   const searchParams = useSearchParams();
@@ -18,37 +19,21 @@ function Player() {
 
   const [useSandbox, setUseSandbox] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [htmlContent, setHtmlContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // The iframe src is now set directly, so we don't need the htmlContent state.
+  const iframeSrc = url ? `/api/scrape?url=${encodeURIComponent(url)}` : undefined;
 
   useEffect(() => {
     if (!url) {
       setError('The watch link is missing or invalid.');
       setIsLoading(false);
-      return;
     }
-
-    async function fetchCleanHtml() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`/api/scrape?url=${encodeURIComponent(url as string)}`);
-        if (!response.ok) {
-          throw new Error('Failed to load player content.');
-        }
-        const text = await response.text();
-        setHtmlContent(text);
-      } catch (e: any) {
-        console.error(e);
-        setError(e.message || 'An unexpected error occurred.');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchCleanHtml();
   }, [url]);
 
+  const handleIframeLoad = () => {
+    setIsLoading(false);
+  };
 
   if (error) {
     return (
@@ -68,6 +53,10 @@ function Player() {
 
   return (
     <div className="flex h-full flex-col">
+       {/* Inject the JW Player script */}
+       <Head>
+        <script src="https://hdstream4u.com/player/jw8/jwplayer.js?v=6" async />
+       </Head>
        <div className="relative w-full aspect-video bg-black">
         {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -75,13 +64,14 @@ function Player() {
                 <div className="absolute text-white">Preparing Secure Player...</div>
             </div>
         )}
-        {!isLoading && htmlContent && (
+        {iframeSrc && (
             <iframe
                 key={iframeKey}
-                srcDoc={htmlContent}
+                src={iframeSrc}
                 className="h-full w-full"
                 allowFullScreen
-                sandbox={useSandbox ? "allow-scripts allow-presentation" : undefined}
+                onLoad={handleIframeLoad}
+                sandbox={useSandbox ? "allow-scripts allow-forms allow-same-origin allow-presentation" : "allow-scripts allow-forms allow-same-origin allow-presentation"}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             ></iframe>
         )}
