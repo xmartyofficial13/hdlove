@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/sheet';
 import { ScrollArea } from '../ui/scroll-area';
 import { SearchModal } from './SearchModal';
+import { InstallButton } from './InstallButton';
 
 export async function Header() {
   const categories = await getCategories();
@@ -102,6 +103,7 @@ export async function Header() {
           <Suspense fallback={<div className="h-10 w-10"></div>}>
              <SearchModal />
           </Suspense>
+          <InstallButton />
           <ThemeToggle />
         </div>
       </div>
