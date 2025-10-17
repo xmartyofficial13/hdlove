@@ -20,6 +20,24 @@ const fontHeadline = Poppins({
 export const metadata: Metadata = {
   title: 'hdlove4u',
   description: 'Your ad-free streaming companion',
+  keywords: 'movies, download, hd, free, streaming, watch online',
+  authors: [{ name: 'Dhanjee Rider' }],
+  robots: 'index, follow',
+  openGraph: {
+    title: 'hdlove4u',
+    description: 'Your ad-free streaming companion',
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'hdlove4u',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'hdlove4u',
+    description: 'Your ad-free streaming companion',
+  },
+  other: {
+    'revisit-after': '7 days',
+  }
 };
 
 export default function RootLayout({

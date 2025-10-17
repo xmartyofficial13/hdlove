@@ -16,6 +16,7 @@ import { DownloadButton } from '@/components/DownloadButton';
 import { ScreenshotGallery } from '@/components/ScreenshotGallery';
 import { RandomStats } from '@/components/RandomStats';
 import { MovieActionButtons } from '@/components/MovieActionButtons';
+import type { Metadata } from 'next';
 
 const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string | React.ReactNode }) => {
   if (!value) return null;
@@ -32,7 +33,7 @@ const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: stri
   );
 };
 
-export async function generateMetadata({ params }: { params: { slug: string[] } }) {
+export async function generateMetadata({ params }: { params: { slug: string[] } }): Promise<Metadata> {
     const path = params.slug.join('/');
     const details = await getMovieDetails(path);
   
@@ -41,13 +42,46 @@ export async function generateMetadata({ params }: { params: { slug: string[] } 
         title: 'Not Found',
       };
     }
+
+    const movieSchema = {
+      "@context": "https://schema.org",
+      "@type": "Movie",
+      "name": details.title,
+      "description": details.description,
+      "image": details.imageUrl,
+      "aggregateRating": details.rating ? {
+        "@type": "AggregateRating",
+        "ratingValue": details.rating,
+        "bestRating": "10"
+      } : undefined,
+      "director": details.director ? {
+          "@type": "Person",
+          "name": details.director
+      } : undefined,
+      "actor": details.stars ? details.stars.split(', ').map(star => ({ "@type": "Person", "name": star })) : undefined,
+      "genre": details.category ? details.category.split(', ').map(cat => cat.trim()) : undefined,
+      "datePublished": details.releaseDate,
+    };
   
     return {
-      title: `${details.title} - NetVlyx`,
+      title: `${details.title} - hdlove4u`,
       description: details.description,
       openGraph: {
+        title: `${details.title} - hdlove4u`,
+        description: details.description,
+        images: [details.imageUrl],
+        type: 'video.movie',
+        url: `/movie/${path}`
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${details.title} - hdlove4u`,
+        description: details.description,
         images: [details.imageUrl],
       },
+      other: {
+        'application/ld+json': JSON.stringify(movieSchema),
+      }
     };
   }
 
