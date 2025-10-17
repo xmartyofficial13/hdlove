@@ -32,6 +32,8 @@ export async function GET(request: Request) {
     
     // Remove specific ad/tracker scripts
     $('script[src*="bvtpk.com"]').remove();
+    $('script[src*="tzegilo.com/stattag.js"]').remove();
+    $('script[src*="hdstream4u.com/ad"]').remove();
 
     // Inject CSS to hide specific elements
     $('head').prepend('<style>.header, .download, .nav, .tab, .tab-content, .nav, .rating, .footer{ display: none !important; } .section{padding:2px;}</style>');
