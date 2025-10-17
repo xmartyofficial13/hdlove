@@ -20,15 +20,32 @@ function Player() {
   const [useSandbox, setUseSandbox] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // The iframe src is now set directly, so we don't need the htmlContent state.
-  const iframeSrc = url ? `/api/scrape?url=${encodeURIComponent(url)}` : undefined;
+  const [htmlContent, setHtmlContent] = useState<string | null>(null);
 
   useEffect(() => {
     if (!url) {
       setError('The watch link is missing or invalid.');
       setIsLoading(false);
+      return;
     }
+
+    const fetchHtml = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
+        if (!response.ok) {
+          throw new Error(`Failed to load player content: ${response.statusText}`);
+        }
+        const html = await response.text();
+        setHtmlContent(html);
+      } catch (e: any) {
+        setError(e.message || 'Failed to load player.');
+        console.error('Player fetch error:', e);
+      }
+    };
+
+    fetchHtml();
   }, [url]);
 
   const handleIframeLoad = () => {
@@ -48,26 +65,24 @@ function Player() {
     );
   }
 
-  // By changing the key, we force the iframe to re-render when the sandbox state changes.
   const iframeKey = useSandbox ? 'sandbox-on' : 'sandbox-off';
 
   return (
     <div className="flex h-full flex-col">
-       {/* Inject the JW Player script */}
        <Head>
         <script src="https://hdstream4u.com/player/jw8/jwplayer.js?v=6" async />
        </Head>
        <div className="relative w-full aspect-video bg-black">
-        {isLoading && (
+        {(isLoading || !htmlContent) && (
             <div className="absolute inset-0 flex items-center justify-center">
                 <Skeleton className="h-full w-full" />
                 <div className="absolute text-white">Preparing Secure Player...</div>
             </div>
         )}
-        {iframeSrc && (
+        {htmlContent && (
             <iframe
                 key={iframeKey}
-                src={iframeSrc}
+                srcDoc={htmlContent}
                 className="h-full w-full"
                 allowFullScreen
                 onLoad={handleIframeLoad}
