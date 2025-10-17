@@ -30,19 +30,44 @@ export async function GET(request: Request) {
     if ($('base').length === 0) {
       $('head').prepend(`<base href="${origin}">`);
     }
+    
+    const adScriptKeywords = [
+        'hdstream4u.com/ad',
+        'vf.accoyblee.com',
+        'bvtpk.com',
+        'googletagmanager',
+        'yandex',
+        'girlieturtle',
+        'your-ad-provider.com' // Add other known ad script keywords here
+    ];
 
-    // Remove all script tags to prevent ads and malicious code, but be careful
+
+    // Remove script tags that are known to be ads
     $('script').each((_, script) => {
         const scriptSrc = $(script).attr('src');
-        // Keep essential player scripts if they can be identified, otherwise remove all.
-        // For now, a safer approach is to remove all scripts that are not part of the core player library if known.
-        // The provided HTML shows scripts from /assets/, which are likely essential.
-        // The obfuscated scripts and trackers (google, yandex) should be removed.
         const scriptContent = $(script).html();
-        if (
-            (scriptSrc && !scriptSrc.startsWith('/assets')) || 
-            (scriptContent && (scriptContent.includes('googletagmanager') || scriptContent.includes('yandex') || scriptContent.includes('girlieturtle')))
-        ) {
+
+        let isAdScript = false;
+
+        if (scriptSrc) {
+            for (const keyword of adScriptKeywords) {
+                if (scriptSrc.includes(keyword)) {
+                    isAdScript = true;
+                    break;
+                }
+            }
+        }
+
+        if (!isAdScript && scriptContent) {
+             for (const keyword of adScriptKeywords) {
+                if (scriptContent.includes(keyword)) {
+                    isAdScript = true;
+                    break;
+                }
+            }
+        }
+        
+        if (isAdScript) {
             $(script).remove();
         }
     });
