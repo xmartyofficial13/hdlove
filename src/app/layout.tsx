@@ -48,6 +48,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+       <head>
+        <link rel="icon" href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg9wpzNkmnm_1lqeVr6DPHEdcVZRyxzjiTlgIE4ke8c6XbbGLzZ6QVDMIzszZY9dQ4Wok8D3_d3mQu6lT8fkv34cSCST5fTEhmOqdNgykKPikENTr-lXm19fUkX_5aiYokCgEynfGAM__OBC3zzbenzHY85EKnHoTkYiLiQeOHGai3ipukVXf1t7mzVZOF1/s192/1000125078.jpg" type="image/jpeg" sizes="any" />
+      </head>
       <body
         className={cn(
           'antialiased',
