@@ -24,7 +24,7 @@ export function InstallButton() {
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later.
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setDeferredPrompt(e as BeforeInstall_promptEvent);
     };
 
     const handleAppInstalled = () => {
