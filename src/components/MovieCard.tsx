@@ -15,8 +15,8 @@ export function MovieCard({ movie, className }: MovieCardProps) {
     "headline": movie.title,
     "image": movie.imageUrl,
     "author": {
-      "@type": "Person",
-      "name": "Dhanjee Rider"
+      "@type": "Organization",
+      "name": "hdlove4u"
     },
     "publisher": {
         "@type": "Organization",

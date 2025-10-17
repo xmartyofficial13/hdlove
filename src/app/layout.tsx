@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   keywords: 'movies, download, hd, free, streaming, watch online',
   authors: [{ name: 'Dhanjee Rider' }],
   robots: 'index, follow',
+  manifest: '/manifest.json',
   openGraph: {
     title: 'hdlove4u',
     description: 'Your ad-free streaming companion',

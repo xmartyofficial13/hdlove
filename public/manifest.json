@@ -1,0 +1,21 @@
+{
+  "name": "hdlove4u",
+  "short_name": "hdlove4u",
+  "description": "Your ad-free streaming companion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#31ff00",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
