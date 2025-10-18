@@ -2,17 +2,50 @@
 import * as cheerio from 'cheerio';
 import type { Movie, MovieDetails, DownloadLink, Category, Episode } from './types';
 
-const BASE_URL = "https://hdhub4u.cologne";
+let baseUrl: string | null = null;
+const REDIRECT_URL = "https://hdhub4u.gd/?re=hdhub&t=1";
 
-async function fetchHtml(url: string) {
+async function getBaseUrl(): Promise<string> {
+    if (baseUrl) {
+        return baseUrl;
+    }
+
+    try {
+        const response = await fetch(REDIRECT_URL, { 
+            method: 'HEAD', 
+            redirect: 'follow',
+            next: { revalidate: 3600 } // Re-check every hour
+        });
+        
+        // The 'response.url' will be the final URL after all redirects
+        const finalUrl = new URL(response.url);
+        
+        // We only want the protocol and hostname, e.g., "https://hdhub4u.pictures"
+        const cleanBaseUrl = `${finalUrl.protocol}//${finalUrl.hostname}`;
+        
+        baseUrl = cleanBaseUrl;
+        return baseUrl;
+    } catch (error) {
+        console.error("Failed to discover base URL, falling back to a default. Error:", error);
+        // Fallback in case the redirector is down
+        return "https://hdhub4u.pictures"; 
+    }
+}
+
+
+async function fetchHtml(path: string) {
+  const B_URL = await getBaseUrl();
+  const url = path.startsWith('http') ? path : `${B_URL}${path}`;
+  console.log(`Fetching URL: ${url}`); // Added for debugging
   try {
     const response = await fetch(url, {
-      next: { revalidate: 3600 }, // Revalidate every hour
+      cache: 'no-store', // Disable caching for fetches
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Referer': B_URL
       },
     });
     if (!response.ok) {
@@ -26,8 +59,9 @@ async function fetchHtml(url: string) {
   }
 }
 
-function parseMovies(html: string): Movie[] {
+async function parseMovies(html: string): Promise<Movie[]> {
   const $ = cheerio.load(html);
+  const B_URL = await getBaseUrl();
   const movies: Movie[] = [];
   const seenPaths = new Set<string>();
 
@@ -37,7 +71,7 @@ function parseMovies(html: string): Movie[] {
      if (path.startsWith('http')) {
         try {
             const url = new URL(path);
-            const baseHostname = new URL(BASE_URL).hostname;
+            const baseHostname = new URL(B_URL).hostname;
             if (url.hostname.endsWith(baseHostname) || url.hostname.includes('hdhub4u')) {
                 path = url.pathname;
             } else {
@@ -75,7 +109,7 @@ function parseMovies(html: string): Movie[] {
          if (path.startsWith('http')) {
             try {
                 const url = new URL(path);
-                const baseHostname = new URL(BASE_URL).hostname;
+                const baseHostname = new URL(B_URL).hostname;
                  if (url.hostname.endsWith(baseHostname) || url.hostname.includes('hdhub4u')) {
                     path = url.pathname;
                 } else {
@@ -99,10 +133,10 @@ function parseMovies(html: string): Movie[] {
 }
 
 export async function getHomepageMovies(page: number = 1): Promise<Movie[]> {
-  const url = page > 1 ? `${BASE_URL}/page/${page}` : BASE_URL;
-  const html = await fetchHtml(url);
+  const path = page > 1 ? `/page/${page}` : '/';
+  const html = await fetchHtml(path);
   if (!html) return [];
-  const movies = parseMovies(html);
+  const movies = await parseMovies(html);
   return movies.map(movie => ({
       ...movie,
       description: movie.title, 
@@ -111,17 +145,22 @@ export async function getHomepageMovies(page: number = 1): Promise<Movie[]> {
 }
 
 export async function getSearchResults(query: string): Promise<Movie[]> {
-  const url = `${BASE_URL}/?s=${encodeURIComponent(query)}`;
-  const html = await fetchHtml(url);
+  const path = `/?s=${encodeURIComponent(query)}`;
+  const html = await fetchHtml(path);
   if (!html) return [];
   return parseMovies(html);
 }
 
 export async function getCategoryMovies(path: string, page: number = 1): Promise<Movie[]> {
-    const cleanPath = path.replace(/^\/category\//, '').replace(/^\//, '');
+    let cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    if (cleanPath.endsWith('/')) {
+        cleanPath = cleanPath.slice(0, -1);
+    }
+
     const pagePath = page > 1 ? `/page/${page}` : '';
-    const url = `${BASE_URL}/category/${cleanPath}${pagePath}`;
-    const html = await fetchHtml(url);
+    const fullPath = `/category/${cleanPath}${pagePath}/`;
+    
+    const html = await fetchHtml(fullPath);
     if (!html) return [];
     return parseMovies(html);
 }
@@ -129,11 +168,11 @@ export async function getCategoryMovies(path: string, page: number = 1): Promise
 
 export async function getMovieDetails(path: string): Promise<MovieDetails | null> {
   const finalPath = path.startsWith('/') ? path : `/${path}`;
-  const url = `${BASE_URL}${finalPath}`;
-  const html = await fetchHtml(url);
+  const html = await fetchHtml(finalPath);
   if (!html) return null;
 
   const $ = cheerio.load(html);
+  const B_URL = await getBaseUrl();
   
   // Exclude ad blocks and other irrelevant sections
   $('.code-block').remove();
@@ -237,7 +276,7 @@ export async function getMovieDetails(path: string): Promise<MovieDetails | null
     const url = a.attr('href');
     const text = a.text().trim();
 
-    if (url && url.startsWith('http') && !url.includes(BASE_URL) && !seenUrls.has(url) && !url.includes('/how-to-download')) {
+    if (url && url.startsWith('http') && !url.includes(B_URL) && !seenUrls.has(url) && !url.includes('/how-to-download')) {
       if (text && text.length > 2 && text.toLowerCase() !== 'here' && text.toLowerCase() !== 'sample') {
          allDownloadLinks.push({ 
           quality: text, 
@@ -365,8 +404,6 @@ export async function getCategories(): Promise<Category[]> {
       { name: "Sci-Fi", path: "/category/sci-fi/" },
       { name: "Thriller", path: "/category/thriller/" },
       { name: "TV Shows", path: "/category/tv-shows/" },
-      { name: "War", path: "/category/war/" },
-      { name: "Web Series", path: "/category/web-series/" },
     ];
-    return Promise.resolve(categories);
+    return categories;
 }
