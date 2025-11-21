@@ -72,9 +72,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Ad script 1 */}
         <Script
-          src="//jargonthugconfessed.com/4cd745d5e9135a001d9a3efbc79adffe.js"
-          strategy="afterInteractive"
-        />
+        src="//oysterspottery.com/4c/d7/45/4cd745d5e9135a001d9a3efbc79adffe.js"
+        strategy="afterInteractive"
+      />
 
         {/* Ad script 2 */}
         <Script id="al5sm-ad" strategy="afterInteractive">
