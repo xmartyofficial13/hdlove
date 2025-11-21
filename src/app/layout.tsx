@@ -85,6 +85,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
           `}
         </Script>
+
+        <script type="text/javascript">
+	atOptions = {
+		'key' : '840b3e447e33e01f03ba1f067dd3ca5e',
+		'format' : 'iframe',
+		'height' : 50,
+		'width' : 320,
+		'params' : {}
+	};
+</script>
+<script type="text/javascript" src="//oysterspottery.com/840b3e447e33e01f03ba1f067dd3ca5e/invoke.js"></script>
       </head>
 
       <body
