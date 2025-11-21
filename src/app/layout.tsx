@@ -20,7 +20,7 @@ const fontHeadline = Poppins({
 export const metadata: Metadata = {
   title: 'Vegamovies | Vegamovies Nl',
   description: 'Vegamovies | Download Bollywood And South Indian Hindi Dubbed Movies For Free , 9xmovies, Katmoviehd,Filmyzilla',
-  keywords: 'movies, vegamovies, vegamovies hd, vegamovies nl, streaming, watch online',
+  keywords: 'Vegamovies, Bollywood movies, South Indian Hindi dubbed movies, Hollywood movies, 300MB movies, Filmyzilla, KatmovieHD, movie download, HD movies',
   authors: [{ name: 'HDlove4u Rider' }],
   robots: 'index, follow',
   manifest: '/manifest.json',
@@ -92,6 +92,15 @@ export default function RootLayout({
             `,
           }}
         />
+        <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W6PX9N715D"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W6PX9N715D');
+</script>
       </body>
     </html>
   );
