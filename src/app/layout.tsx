@@ -18,13 +18,13 @@ const fontHeadline = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Movies4u',
-  description: 'Your ad-free streaming companion',
-  keywords: 'movies, download, hd, free, streaming, watch online',
+  title: 'Vegamovies | Vegamovies Nl',
+  description: 'Vegamovies | Download Bollywood And South Indian Hindi Dubbed Movies For Free , 9xmovies, Katmoviehd,Filmyzilla',
+  keywords: 'movies, vegamovies, vegamovies hd, vegamovies nl, streaming, watch online',
   authors: [{ name: 'HDlove4u Rider' }],
   robots: 'index, follow',
   manifest: '/manifest.json',
-  openGraph: {
+  openGraph: v{
     title: 'hdlove4u',
     description: 'Your ad-free streaming companion',
     type: 'website',
