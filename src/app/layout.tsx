@@ -18,7 +18,7 @@ const fontHeadline = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'hdlove4u',
+  title: 'Movies4u',
   description: 'Your ad-free streaming companion',
   keywords: 'movies, download, hd, free, streaming, watch online',
   authors: [{ name: 'HDlove4u Rider' }],
