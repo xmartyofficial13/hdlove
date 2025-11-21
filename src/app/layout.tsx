@@ -50,6 +50,23 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
        <head>
         <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="any" />
+         <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W6PX9N715D"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W6PX9N715D');
+</script>
+
+<script type='text/javascript' src='//jargonthugconfessed.com/4c/d7/45/4cd745d5e9135a001d9a3efbc79adffe.js'></script>
+<meta name="6a97888e-site-verification" content="19a17ac293cb60d861e48f71ae2b483a">
+
+
+<script>(function(s){s.dataset.zone='10016379',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
+<meta name="monetag" content="ad73e4587e3e8d1a045d2cf81136f863">
       </head>
       <body
         className={cn(
@@ -92,23 +109,7 @@ export default function RootLayout({
             `,
           }}
         />
-        <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-W6PX9N715D"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-W6PX9N715D');
-</script>
-
-<script type='text/javascript' src='//jargonthugconfessed.com/4c/d7/45/4cd745d5e9135a001d9a3efbc79adffe.js'></script>
-<meta name="6a97888e-site-verification" content="19a17ac293cb60d861e48f71ae2b483a">
-
-
-<script>(function(s){s.dataset.zone='10016379',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-
-<meta name="monetag" content="ad73e4587e3e8d1a045d2cf81136f863">
+        
           
       </body>
     </html>
